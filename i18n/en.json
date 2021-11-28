@@ -1,0 +1,10 @@
+{
+  "@metadata": {
+    "authors": [
+      "Chris Rishel"
+    ]
+  },
+  "articlescores": "Article Scores",
+  "articlescores-extensionname": "ArticleScores",
+  "articlescores-desc": "Adds the ability to score article quality using modular metrics."
+}

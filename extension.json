@@ -1,0 +1,40 @@
+{
+  "name": "ArticleScores",
+  "namemsg": "articlescores-extensionname",
+  "version": "0.1.0",
+  "author": [
+    "Chris Rishel"
+  ],
+  "license-name": "GPL-3.0-or-later",
+  "url": "https://www.mediawiki.org/wiki/Extension:ArticleScores",
+  "descriptionmsg": "articlescores-desc",
+  "type": "specialpage",
+  "requires": {
+    "MediaWiki": ">= 1.35.0",
+    "extensions": {}
+  },
+  "callback": "MediaWiki\\Extension\\ArticleScores\\ArticleScores::initialize",
+  "config_prefix": "wg",
+  "config": {
+    "ArticleScoresMetric": {
+      "value": "rating"
+    }
+  },
+  "AutoloadNamespaces": {
+    "MediaWiki\\Extension\\ArticleScores\\": "src/"
+  },
+  "Hooks": {
+    "ParserFirstCallInit": "main"
+  },
+  "HookHandlers": {
+    "main": {
+      "class": "MediaWiki\\Extension\\ArticleScores\\Hook\\HookHandler"
+    }
+  },
+  "MessagesDirs": {
+    "ArticleScores": [
+      "i18n"
+    ]
+  },
+  "manifest_version": 2
+}
