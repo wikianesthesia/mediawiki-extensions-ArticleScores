@@ -1,0 +1,9 @@
+{
+  "@metadata": {
+    "authors": [
+      "Chris Rishel"
+    ]
+  },
+  "articlescores-rating-name": "Editor rating",
+  "articlescores-rating-desc": "Editor rating of an article (set by users with the articlescores-editorrating right)."
+}

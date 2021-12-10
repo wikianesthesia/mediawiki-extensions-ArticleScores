@@ -24,6 +24,8 @@
     "MediaWiki\\Extension\\ArticleScores\\": "src/"
   },
   "Hooks": {
+    "ArticleScoresRegisterMetrics": "main",
+    "LoadExtensionSchemaUpdates": "main",
     "ParserFirstCallInit": "main"
   },
   "HookHandlers": {
@@ -36,5 +38,6 @@
       "i18n"
     ]
   },
+  "ServiceWiringFiles": [ "src/ServiceWiring.php" ],
   "manifest_version": 2
 }

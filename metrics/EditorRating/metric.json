@@ -1,0 +1,23 @@
+{
+  "class": "MediaWiki\\Extension\\ArticleScores\\Metric\\EditorRating",
+  "version": "1.0",
+  "author": [
+    "Chris Rishel"
+  ],
+  "config": {
+    "MinValue": 0,
+    "MaxValue": 5,
+    "StepValue": 1
+  },
+  "AvailableRights": [
+    "articlescores-editorrating"
+  ],
+  "GroupPermissions": {
+    "sysop": {
+      "articlescores-editorrating": true
+    }
+  },
+  "MessagesDirs": [
+    "i18n"
+  ]
+}

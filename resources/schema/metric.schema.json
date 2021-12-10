@@ -1,0 +1,94 @@
+{
+  "$schema": "http://json-schema.org/schema#",
+  "description": "ArticleScores metric.json schema. A metric's json definition, along with all supporting files (internationalization messages, images, etc.) must be contained in a subdirectory of the \"metrics\" directory of the ArticleScores extension. The name of this subdirectory defines the case-sensitive id of the metric. For consistency, many fields use the same names as the extension.json schema. However, only a limited subset of these fields are supported for metrics.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "The id of the metric. This must be unique across all registered metrics. If not specified, will default to the class name (without the namespace)."
+    },
+    "class": {
+      "type": "string",
+      "description": "The full class name (including namespace) of the metric",
+      "required": true
+    },
+    "classfile": {
+      "type": "string",
+      "description": "The relative path to the metric class php file. If not specified, will default to the class name (without the namespace) in the same directory as the json definition."
+    },
+    "version": {
+      "type": "string",
+      "description": "The version of this release of the metric."
+    },
+    "author": {
+      "type": [
+        "string",
+        "array"
+      ],
+      "description": "Metric's authors.",
+      "items": {
+        "type": "string"
+      },
+      "default": ""
+    },
+    "name": {
+      "type": "string",
+      "description": "Raw display name of the metric. If not specified, this will default to the metric's id."
+    },
+    "namemsg": {
+      "type": "string",
+      "description": "i18n message key of the metric's name. If not specified, will attempt to use the message key \"articlescores-METRICID-name\". If a valid message is defined, this will take precedence over the value of \"name\"."
+    },
+    "description": {
+      "type": "string",
+      "description": "Raw description of the metric."
+    },
+    "descriptionmsg": {
+      "type": "string",
+      "description": "i18n message key of the metric's description. If not specified, will attempt to use the message key \"articlesores-METRICID-desc\". If a valid message is defined, this will take precedence over the value of \"description\"."
+    },
+    "config": {
+      "type": "object",
+      "description": "Configuration options for this metric. Unlike the extension.json definition of this field, this should be a simple object with the variable names as properties and default values as values.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "AutoloadClasses": {
+      "type": "object",
+      "description": "Classes and their files to autoload. This should be a simple object with the class name as properties and the local path to the class files function as values.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "AvailableRights": {
+      "type": "array",
+      "description": "User rights added by the class.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "GroupPermissions": {
+      "type": "object",
+      "description": "Default permissions to give to usergroup. This should be a two dimensional object with the usergroup as the first dimension's properties, the rights as the second dimension, and a boolean to grant or deny the right as values.",
+      "items": {
+        "type": "object"
+      }
+    },
+    "Hooks": {
+      "type": "object",
+      "description": "MediaWiki hooks. This should be a simple object with the hook as properties and the callback function as values.",
+      "items": {
+        "type": "string"
+      }
+    },
+    "MessagesDirs": {
+      "type": "array",
+      "description": "Directory paths containing JSON internationalization data. Unlike the extension.json definition of this field, this should be a simple array of paths relative to the metric's root.",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}
