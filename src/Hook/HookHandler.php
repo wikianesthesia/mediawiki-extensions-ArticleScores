@@ -20,7 +20,8 @@ class HookHandler implements
         # Make sure these are in the order you want them added to the database. The keys are the table names and the
         # values are any field in the table (used to see if the table is empty to insert the default data).
         $tableNames = [
-            'articlescore' => 'articlescore_id'
+            'articlescores_metrics' => 'metric_id',
+            'articlescores_scores' => 'score_id'
         ];
 
         $db = $updater->getDB();

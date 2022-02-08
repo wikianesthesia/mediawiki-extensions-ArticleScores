@@ -1,0 +1,17 @@
+{
+  "@metadata": {
+    "authors": [
+      "Chris Rishel"
+    ]
+  },
+  "apihelp-articlescores-summary": "Allows actions to be taken for article scores",
+  "apihelp-articlescores-param-asaction": "The article score action to invoke",
+  "apihelp-articlescores-param-token": "A \"csrf\" token (if applicable)",
+  "apihelp-articlescores+getscores-summary": "Get scores for an article",
+  "apihelp-articlescores+getscores-param-pageid": "The page id of the article",
+  "apihelp-articlescores+setscore-summary": "Set score for an article",
+  "apihelp-articlescores+setscore-param-pageid": "The page id of the article",
+  "apihelp-articlescores+setscore-param-metricid": "The metric id of the score",
+  "apihelp-articlescores+setscore-param-submetricid": "The submetric id of the score",
+  "apihelp-articlescores+setscore-param-value": "The value of the score"
+}

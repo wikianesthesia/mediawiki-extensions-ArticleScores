@@ -1,0 +1,45 @@
+{
+  "class": "MediaWiki\\Extension\\ArticleScores\\Metric\\Likes",
+  "version": "1.0",
+  "author": [
+    "Chris Rishel"
+  ],
+  "score": {
+    "main": {
+      "DefaultValue": 0,
+      "DerivedValue": true,
+      "KeepHistory": false
+    },
+    "dislikes": {
+      "DefaultValue": 0,
+      "DerivedValue": true
+    },
+    "likes": {
+      "DefaultValue": 0,
+      "DerivedValue": true
+    },
+    "user": {
+      "DefaultValue": 0,
+      "KeepHistory": false,
+      "MinValue": -1,
+      "MaxValue": 1,
+      "StepValue": 1,
+      "RequiresRight": "articlescores-like",
+      "PerUser": true
+    }
+  },
+  "AvailableRights": [
+    "articlescores-like"
+  ],
+  "GroupPermissions": {
+    "sysop": {
+      "articlescores-like": true
+    },
+    "user": {
+      "articlescores-like": true
+    }
+  },
+  "MessagesDirs": [
+    "i18n"
+  ]
+}

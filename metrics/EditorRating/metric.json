@@ -4,10 +4,14 @@
   "author": [
     "Chris Rishel"
   ],
-  "config": {
-    "MinValue": 0,
-    "MaxValue": 5,
-    "StepValue": 1
+  "score": {
+    "main": {
+      "DefaultValue": 0,
+      "MinValue": 0,
+      "MaxValue": 5,
+      "StepValue": 1,
+      "RequiresRight": "articlescores-editorrating"
+    }
   },
   "AvailableRights": [
     "articlescores-editorrating"

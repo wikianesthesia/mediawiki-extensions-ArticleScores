@@ -7,8 +7,11 @@ use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
 use Psr\Log\LoggerInterface;
 use Wikimedia\Rdbms\DBConnRef;
+use WANObjectCache;
 
 class ArticleScores {
+    public const CACHE_TTL = WANObjectCache::TTL_SECOND;
+    public const DEFAULT_SUBMETRIC = 'main';
     protected const SCHEMA_CLASS = MetricSchema::class;
 
     /**
@@ -31,6 +34,10 @@ class ArticleScores {
      */
     protected static $metricsLocalDirectory;
 
+
+    public static function getArticleScoresForPageId( int $pageId ): ?ArticleScore {
+        return ArticleScore::newFromTitleId( $pageId );
+    }
 
 
     /**

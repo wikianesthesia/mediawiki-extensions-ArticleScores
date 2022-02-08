@@ -1,1 +1,2 @@
-DROP TABLE IF EXISTS /*_*/articlescore;
+DROP TABLE IF EXISTS /*_*/articlescores_metrics;
+DROP TABLE IF EXISTS /*_*/articlescores_scores;

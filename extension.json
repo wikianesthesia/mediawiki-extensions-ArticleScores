@@ -8,7 +8,7 @@
   "license-name": "GPL-3.0-or-later",
   "url": "https://www.mediawiki.org/wiki/Extension:ArticleScores",
   "descriptionmsg": "articlescores-desc",
-  "type": "specialpage",
+  "type": "other",
   "requires": {
     "MediaWiki": ">= 1.35.0",
     "extensions": {}
@@ -23,6 +23,12 @@
   "AutoloadNamespaces": {
     "MediaWiki\\Extension\\ArticleScores\\": "src/"
   },
+  "Actions": {
+    "score": "MediaWiki\\Extension\\ArticleScores\\Action\\ScoreAction"
+  },
+  "APIModules": {
+    "articlescores": "MediaWiki\\Extension\\ArticleScores\\Api\\ApiArticleScores"
+  },
   "Hooks": {
     "ArticleScoresRegisterMetrics": "main",
     "LoadExtensionSchemaUpdates": "main",
@@ -35,8 +41,12 @@
   },
   "MessagesDirs": {
     "ArticleScores": [
-      "i18n"
+      "i18n",
+      "i18n/api"
     ]
+  },
+  "SpecialPages": {
+    "ArticleScores": "MediaWiki\\Extension\\ArticleScores\\Special\\SpecialArticleScores"
   },
   "ServiceWiringFiles": [ "src/ServiceWiring.php" ],
   "manifest_version": 2

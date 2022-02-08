@@ -48,6 +48,10 @@
       "type": "string",
       "description": "i18n message key of the metric's description. If not specified, will attempt to use the message key \"articlesores-METRICID-desc\". If a valid message is defined, this will take precedence over the value of \"description\"."
     },
+    "score": {
+      "type": "object",
+      "description": "Definition of the submetrics"
+    },
     "config": {
       "type": "object",
       "description": "Configuration options for this metric. Unlike the extension.json definition of this field, this should be a simple object with the variable names as properties and default values as values.",
