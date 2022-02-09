@@ -2,7 +2,7 @@ CREATE TABLE /*_*/articlescores_scores (
   `score_id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
   `page_id` INT(10) UNSIGNED NOT NULL,
   `metric_id` VARBINARY(64) NOT NULL,
-  `submetric` VARBINARY(32) NOT NULL,
+  `submetric_id` VARBINARY(32) NOT NULL,
   `userscore` TINYINT(1) NOT NULL DEFAULT 0,
   `value` TINYBLOB NOT NULL,
   `comment` TINYBLOB NULL,

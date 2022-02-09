@@ -2,6 +2,7 @@
 
 namespace MediaWiki\Extension\ArticleScores;
 
+use Database;
 use MediaWiki\Extension\JsonSchemaClasses\AbstractJsonSchemaClass;
 use MediaWiki\MediaWikiServices;
 use MWTimestamp;
@@ -9,6 +10,7 @@ use RequestContext;
 use Status;
 use Title;
 use User;
+use WikiPage;
 
 abstract class AbstractMetric extends AbstractJsonSchemaClass {
     /**
@@ -16,43 +18,126 @@ abstract class AbstractMetric extends AbstractJsonSchemaClass {
      */
     protected $submetrics = [];
 
-    /**
-     * @param Title $title
-     * @return array
-     */
-    public function getArticleScoreValues( Title $title ): array {
-        $values = [];
-        $dbValues = $this->getScoreValuesFromQueryInfo( $this->getArticleScoreQueryInfo( $title ) );
+    protected $titleScoreValues;
+    protected $userScoreValues;
 
-        foreach( $this->getSubmetrics() as $submetricId => $submetric ) {
-            if( $submetric->perUser ) {
-                continue;
-            }
-
-            $values[ $submetricId ] = $dbValues[ $submetricId ] ?? $submetric->defaultValue;
-        }
-
-        return $values;
-    }
+    abstract public function getArticleScoreHtml( Title $title ): string;
 
     /**
      * @param Title $title
-     * @param User $user
-     * @return array
+     * @return ArticleScoreValue[]
      */
-    public function getArticleUserScoreValues( Title $title, User $user ): array {
-        $values = [];
-        $dbValues = $this->getScoreValuesFromQueryInfo( $this->getArticleUserScoreQueryInfo( $title, $user ) );
+    public function getArticleScoreValues( Title $title, bool $includeUserscores = false, bool $includeDefaultValues = false ): array {
+        $articleScoreValues = [];
 
-        foreach( $this->getSubmetrics() as $submetricId => $submetric ) {
-            if( !$submetric->perUser ) {
-                continue;
-            }
-
-            $values[ $submetricId ] = $dbValues[ $submetricId ] ?? $submetric->defaultValue;
+        if( !$title->exists() ) {
+            return $articleScoreValues;
         }
 
-        return $values;
+        $db = ArticleScores::getDB();
+
+        $queryInfo = [
+            'tables' => 'articlescores_scores',
+            'vars' => [
+                'submetric_id',
+                'value'
+            ],
+            'conds' => [
+                'page_id' => $title->getArticleID(),
+                'metric_id' => $this->getId(),
+                'userscore' => 0
+            ],
+            'options' => [
+                'ORDER BY' => 'timestamp DESC'
+            ],
+            'join_conds' => []
+        ];
+
+        if( is_null( $this->titleScoreValues ) ) {
+            $titleScoresCallback = function( $oldValue, &$ttl, array &$setOpts ) use ( $db, $queryInfo ) {
+                $titleScoreValues = [];
+
+                $setOpts += Database::getCacheSetOptions( $db );
+
+                $res = $db->select(
+                    $queryInfo[ 'tables' ],
+                    $queryInfo[ 'vars' ],
+                    $queryInfo[ 'conds' ],
+                    __METHOD__,
+                    $queryInfo[ 'options' ],
+                    $queryInfo[ 'join_conds' ]
+                );
+
+                $submetrics = $this->getSubmetrics();
+
+                foreach( $res as $row ) {
+                    // The most recent (i.e. relevant) value for each submetric will be returned first due to ORDER BY
+                    // Thus, only set this value once and skip subsequent rows. Also only set this value if it is a valid
+                    // submetric.
+                    // TODO should be able to use some sort of subquery with GROUP BY to avoid returning old rows
+                    if( !isset( $titleScoreValues[ $row->submetric_id ] ) && array_key_exists( $row->submetric_id, $submetrics ) ) {
+                        $titleScoreValues[ $row->submetric_id ] = new ArticleScoreValue( $row->value, true, false );
+                    }
+                }
+
+                return $titleScoreValues;
+            };
+
+            $cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
+
+            $this->titleScoreValues = $cache->getWithSetCallback(
+                $this->getCacheKey( $title ),
+                ArticleScores::CACHE_TTL,
+                $titleScoresCallback
+            );
+        }
+
+        $articleScoreValues = array_merge( $articleScoreValues, $this->titleScoreValues );
+
+        $user = RequestContext::getMain()->getUser();
+
+        if( $includeUserscores && $user->isRegistered() ) {
+            if( is_null( $this->userScoreValues ) ) {
+                $this->userScoreValues = [];
+
+                unset( $queryInfo[ 'conds' ][ 'userscore' ] );
+                $queryInfo[ 'conds' ][] = '(userscore = 1 AND user_id = ' . $db->addQuotes( $user->getId() ) . ')';
+
+                $res = $db->select(
+                    $queryInfo[ 'tables' ],
+                    $queryInfo[ 'vars' ],
+                    $queryInfo[ 'conds' ],
+                    __METHOD__,
+                    $queryInfo[ 'options' ],
+                    $queryInfo[ 'join_conds' ]
+                );
+
+                $submetrics = $this->getSubmetrics();
+
+                foreach( $res as $row ) {
+                    // The most recent (i.e. relevant) value for each submetric will be returned first due to ORDER BY
+                    // Thus, only set this value once and skip subsequent rows. Also only set this value if it is a valid
+                    // submetric.
+                    // TODO should be able to use some sort of subquery with GROUP BY to avoid returning old rows
+                    if( !isset( $titleValues[ $row->submetric_id ] ) && array_key_exists( $row->submetric_id, $submetrics ) ) {
+                        $this->userScoreValues[ $row->submetric_id ] = new ArticleScoreValue( $row->value, true, true );
+                    }
+                }
+            }
+
+            $articleScoreValues = array_merge( $articleScoreValues, $this->userScoreValues );
+        }
+
+        // Default values for undefined submetrics
+        if( $includeDefaultValues ) {
+            foreach( $this->getSubmetrics() as $submetricId => $submetric ) {
+                if( !isset( $articleScoreValues[ $submetricId] ) ) {
+                    $articleScoreValues[ $submetricId ] = new ArticleScoreValue( $submetric->defaultValue, false, $submetric->perUser );
+                }
+            }
+        }
+
+        return $articleScoreValues;
     }
 
     /**
@@ -157,7 +242,7 @@ abstract class AbstractMetric extends AbstractJsonSchemaClass {
 
         $this->updateDerivedValues( $title );
 
-        ArticleScore::clearCache( $title );
+        $this->purgeTitle( $title );
 
         return $result;
     }
@@ -249,7 +334,7 @@ abstract class AbstractMetric extends AbstractJsonSchemaClass {
         $row = [
             'page_id' => $title->getArticleID(),
             'metric_id' => $this->getId(),
-            'submetric' => $submetricId,
+            'submetric_id' => $submetricId,
             'userscore' => $submetric->perUser,
             'user_id' => $user->getId()
         ];
@@ -292,49 +377,10 @@ abstract class AbstractMetric extends AbstractJsonSchemaClass {
         return $result;
     }
 
-    /**
-     * @param Title $title
-     * @return array|null
-     */
-    protected function getArticleScoreQueryInfo( Title $title ): ?array {
-        if( !$title->getArticleID() ) {
-            return null;
-        }
+    protected function getCacheKey( Title $title ): string {
+        $cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
 
-        return [
-            'tables' => 'articlescores_scores',
-            'vars' => [
-                'submetric',
-                'value'
-            ],
-            'conds' => [
-                'page_id' => $title->getArticleID(),
-                'metric_id' => $this->getId(),
-                'userscore' => 0
-            ],
-            'options' => [
-                'ORDER BY' => 'timestamp DESC'
-            ],
-            'join_conds' => []
-        ];
-    }
-
-    /**
-     * @param Title $title
-     * @param User $user
-     * @return array|null
-     */
-    protected function getArticleUserScoreQueryInfo( Title $title, User $user ): ?array {
-        $articleScoreQueryInfo = $this->getArticleScoreQueryInfo( $title );
-
-        if( !is_array( $articleScoreQueryInfo ) || !$user->isRegistered() ) {
-            return null;
-        }
-
-        $articleScoreQueryInfo[ 'conds' ][ 'userscore' ] = 1;
-        $articleScoreQueryInfo[ 'conds' ][ 'user_id' ] = $user->getId();
-
-        return $articleScoreQueryInfo;
+        return $cache->makeKey( static::class, $title->getArticleID() );
     }
 
     /**
@@ -352,15 +398,6 @@ abstract class AbstractMetric extends AbstractJsonSchemaClass {
         $values = [];
 
         $db = ArticleScores::getDB();
-
-        var_dump( $db->selectSQLText(
-            $queryInfo[ 'tables' ],
-            $queryInfo[ 'vars' ],
-            $queryInfo[ 'conds' ],
-            __METHOD__,
-            $queryInfo[ 'options' ],
-            $queryInfo[ 'join_conds']
-        ) );
 
         $res = $db->select(
             $queryInfo[ 'tables' ],
@@ -397,6 +434,15 @@ abstract class AbstractMetric extends AbstractJsonSchemaClass {
         foreach( $definition[ 'score' ] as $submetricId => $submetricDefinition ) {
             $this->submetrics[ $submetricId ] = new Submetric( $submetricDefinition );
         }
+    }
+
+    protected function purgeTitle( Title $title ) {
+        $cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
+        $cache->delete( $this->getCacheKey( $title ) );
+
+        // Clear cache of page
+        $page = WikiPage::factory( $title );
+        $page->doPurge();
     }
 
     protected function updateDerivedValues( Title $title ) {

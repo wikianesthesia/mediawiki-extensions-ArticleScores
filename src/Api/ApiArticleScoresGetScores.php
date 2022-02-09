@@ -4,6 +4,7 @@ namespace MediaWiki\Extension\ArticleScores\Api;
 
 use ApiBase;
 use MediaWiki\Extension\ArticleScores\ArticleScores;
+use Wikimedia\ParamValidator\ParamValidator;
 
 class ApiArticleScoresGetScores extends ApiArticleScoresBaseGet {
     public function __construct( $api, $modName ) {
@@ -23,21 +24,11 @@ class ApiArticleScoresGetScores extends ApiArticleScoresBaseGet {
 
         $params = $this->extractRequestParams();
 
-        $articleScores = ArticleScores::getArticleScoresForPageId( $params[ 'pageid' ] );
-
-        if( !$articleScores ) {
-            $output[ $asaction ][ 'status' ] = 'error';
-            $output[ $asaction ][ 'message' ] = wfMessage(
-                'articlescores-invalidpageid',
-                $params[ 'pageid' ]
-            );
-
-            $this->getResult()->addValue( null, $this->apiArticleScores->getModuleName(), $output );
-
-            return;
-        }
-
-        $output[ $asaction ][ 'result' ] = $articleScores->getValues();
+        $output[ $asaction ][ 'result' ] = ArticleScores::getArticleScoresForPageId(
+            $params[ 'pageid' ],
+            $params[ 'userscores' ],
+            $params[ 'defaults' ],
+        );
 
         $this->getResult()->addValue( null, $this->apiArticleScores->getModuleName(), $output );
     }
@@ -54,6 +45,16 @@ class ApiArticleScoresGetScores extends ApiArticleScoresBaseGet {
             'pageid' => [
                 ApiBase::PARAM_REQUIRED => true,
                 ApiBase::PARAM_TYPE => 'string'
+            ],
+            'userscores' => [
+                ApiBase::PARAM_REQUIRED => false,
+                ApiBase::PARAM_TYPE => 'integer',
+                ParamValidator::PARAM_DEFAULT => 0
+            ],
+            'defaults' => [
+                ApiBase::PARAM_REQUIRED => false,
+                ApiBase::PARAM_TYPE => 'integer',
+                ParamValidator::PARAM_DEFAULT => 0
             ]
         ];
     }

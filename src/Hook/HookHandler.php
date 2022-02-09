@@ -56,6 +56,6 @@ class HookHandler implements
     }
 
     public function onParserFirstCallInit( $parser ) {
-
+        $parser->setHook( 'articlescores', 'MediaWiki\\Extension\\ArticleScores\\Parser\\ArticleScores::render' );
     }
 }

@@ -9,6 +9,8 @@
   "apihelp-articlescores-param-token": "A \"csrf\" token (if applicable)",
   "apihelp-articlescores+getscores-summary": "Get scores for an article",
   "apihelp-articlescores+getscores-param-pageid": "The page id of the article",
+  "apihelp-articlescores+getscores-param-userscores": "Should userscores be included in results",
+  "apihelp-articlescores+getscores-param-defaults": "Should default values be included in results",
   "apihelp-articlescores+setscore-summary": "Set score for an article",
   "apihelp-articlescores+setscore-param-pageid": "The page id of the article",
   "apihelp-articlescores+setscore-param-metricid": "The metric id of the score",

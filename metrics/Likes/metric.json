@@ -18,6 +18,13 @@
       "DefaultValue": 0,
       "DerivedValue": true
     },
+    "percentLikes": {
+      "DefaultValue": 0,
+      "KeepHistory": false,
+      "MinValue": 0,
+      "MaxValue": 100,
+      "DerivedValue": true
+    },
     "user": {
       "DefaultValue": 0,
       "KeepHistory": false,

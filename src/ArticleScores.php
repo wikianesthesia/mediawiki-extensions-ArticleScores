@@ -6,6 +6,7 @@ use MediaWiki\Extension\JsonSchemaClasses\JsonSchemaClassManager;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
 use Psr\Log\LoggerInterface;
+use Title;
 use Wikimedia\Rdbms\DBConnRef;
 use WANObjectCache;
 
@@ -35,8 +36,20 @@ class ArticleScores {
     protected static $metricsLocalDirectory;
 
 
-    public static function getArticleScoresForPageId( int $pageId ): ?ArticleScore {
-        return ArticleScore::newFromTitleId( $pageId );
+    public static function getArticleScoresForPageId( int $pageId, bool $includeUserscores = false, bool $includeDefaultValues = false ): array {
+        $articleScores = [];
+
+        $title = Title::newFromID( $pageId );
+
+        if( !$title || !$title->exists() ) {
+            return $articleScores;
+        }
+
+        foreach( static::getMetrics() as $metric ) {
+            $articleScores[ $metric->getId() ] = $metric->getArticleScoreValues( $title, $includeUserscores, $includeDefaultValues );
+        }
+
+        return $articleScores;
     }
 
 
