@@ -14,8 +14,16 @@ class MetricSchema extends AbstractSchema {
         return 'metric.json';
     }
 
+    public function getExtensionName(): string {
+        return ArticleScores::getExtensionName();
+    }
+
     public function getSchemaFile(): string {
         return ArticleScores::getExtensionLocalDirectory() . '/resources/schema/metric.schema.json';
+    }
+
+    public function getSchemaName(): string {
+        return 'Metric';
     }
 
     public function registerClasses( &$classRegistry ) {

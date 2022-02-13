@@ -4,54 +4,98 @@ namespace MediaWiki\Extension\ArticleScores;
 
 class Submetric {
     /**
-     * @var mixed|null
+     * @var AbstractMetric
      */
-    public $defaultValue;
+    protected $_metric;
 
     /**
      * @var bool
      */
-    public $derivedValue;
+    protected $keepHistory;
+
+    /**
+     * @var string
+     */
+    protected $id;
 
     /**
      * @var bool
      */
-    public $keepHistory;
+    protected $perUser;
 
     /**
-     * @var mixed|null
+     * @var string|null
      */
-    public $maxValue;
+    protected $requiresRight;
 
     /**
-     * @var mixed|null
+     * @var SubmetricValueDefinition
      */
-    public $minValue;
+    protected $valueDefinition;
 
     /**
-     * @var bool
+     * @param array $definition
      */
-    public $perUser;
+    public function __construct( array $definition, AbstractMetric $metric) {
+        $this->_metric = $metric;
 
-    /**
-     * @var mixed|null
-     */
-    public $stepValue;
+        $this->id = $definition[ 'id' ];
 
-    /**
-     * @var mixed|null
-     */
-    public $requiresRight;
-
-
-    public function __construct( array $definition ) {
-        $this->defaultValue = $definition[ 'DefaultValue' ] ?? null;
-        $this->derivedValue = (bool) ( $definition[ 'DerivedValue' ] ?? false );
-        $this->keepHistory = (bool) ( $definition[ 'KeepHistory' ] ?? true );
-        $this->maxValue = $definition[ 'MaxValue' ] ?? null;
-        $this->minValue = $definition[ 'MinValue' ] ?? null;
-        $this->perUser = (bool) ( $definition[ 'PerUser' ] ?? false );
-        $this->stepValue = $definition[ 'StepValue' ] ?? null;
+        $this->keepHistory = (bool) ( $definition[ 'KeepHistory' ] ?? null );
+        $this->perUser = (bool) ( $definition[ 'PerUser' ] ?? null );
         $this->requiresRight = $definition[ 'RequiresRight' ] ?? null;
+
+        $this->valueDefinition = new SubmetricValueDefinition( $definition[ 'value' ] ?? [], $this );
+    }
+
+    /**
+     * @return string
+     */
+    public function getId(): string {
+        return $this->id;
+    }
+
+    /**
+     * @return AbstractMetric
+     */
+    public function getMetric(): AbstractMetric {
+        return $this->_metric;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMsgKeyPrefix(): string {
+        return $this->getMetric()->getMsgKeyPrefix() .
+            '-' .
+            $this->getId();
+    }
+
+    /**
+     * @return SubmetricValueDefinition
+     */
+    public function getValueDefinition(): SubmetricValueDefinition {
+        return $this->valueDefinition;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPerUser(): bool {
+        return $this->perUser;
+    }
+
+    /**
+     * @return bool
+     */
+    public function keepHistory(): bool {
+        return $this->keepHistory;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function requiresRight(): ?string {
+        return $this->requiresRight;
     }
 }

@@ -6,34 +6,45 @@
   ],
   "score": {
     "main": {
-      "DefaultValue": 0,
-      "DerivedValue": true,
-      "KeepHistory": false
+      "value": {
+        "default": 0,
+        "derived": true
+      }
     },
     "dislikes": {
-      "DefaultValue": 0,
-      "DerivedValue": true
+      "value": {
+        "default": 0,
+        "derived": true
+      }
     },
     "likes": {
-      "DefaultValue": 0,
-      "DerivedValue": true
+      "value": {
+        "default": 0,
+        "derived": true
+      }
     },
     "percentLikes": {
-      "DefaultValue": 0,
-      "KeepHistory": false,
-      "MinValue": 0,
-      "MaxValue": 100,
-      "DerivedValue": true
+      "value": {
+        "default": 0,
+        "min": 0,
+        "max": 100,
+        "derived": true
+      }
     },
     "user": {
-      "DefaultValue": 0,
-      "KeepHistory": false,
-      "MinValue": -1,
-      "MaxValue": 1,
-      "StepValue": 1,
+      "value": {
+        "default": 0,
+        "min": -1,
+        "max": 1,
+        "step": 1,
+        "unset": 0
+      },
       "RequiresRight": "articlescores-like",
       "PerUser": true
     }
+  },
+  "config": {
+    "EnableDislikes": false
   },
   "AvailableRights": [
     "articlescores-like"
@@ -48,5 +59,28 @@
   },
   "MessagesDirs": [
     "i18n"
-  ]
+  ],
+  "ResourceModules": {
+    "ext.articleScores.likes": {
+      "scripts": [
+        "articleScores.likes/articleScores.likes.js"
+      ],
+      "styles": [
+        "articleScores.likes/articleScores.likes.less"
+      ],
+      "dependencies": [
+        "ext.articleScores.common"
+      ],
+      "messages": [
+        "articlescores-likes-dislike",
+        "articlescores-likes-disliked",
+        "articlescores-likes-like",
+        "articlescores-likes-liked"
+      ]
+    }
+  },
+  "ResourceFileModulePaths": {
+    "localBasePath": "modules",
+    "remoteExtPath": "ArticleScores/metrics/Likes/modules"
+  }
 }

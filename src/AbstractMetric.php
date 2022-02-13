@@ -18,10 +18,27 @@ abstract class AbstractMetric extends AbstractJsonSchemaClass {
      */
     protected $submetrics = [];
 
-    protected $titleScoreValues;
-    protected $userScoreValues;
+    protected $titleScoreValues = [];
+    protected $userScoreValues = [];
 
-    abstract public function getArticleScoreHtml( Title $title ): string;
+    /**
+     * @param Title $title
+     * @param bool $includeLabel
+     * @param bool $includeInput
+     * @return string
+     */
+    abstract public function getArticleScoreHtml( Title $title, bool $includeLabel = true, bool $includeInput = true ): string;
+
+    /**
+     * @param Title $title
+     * @param string $submetricId
+     * @return ArticleScoreValue|null
+     */
+    public function getArticleScoreValue( Title $title, string $submetricId = ArticleScores::DEFAULT_SUBMETRIC ): ?ArticleScoreValue {
+        $articleScoreValues = $this->getArticleScoreValues( $title, true, true );
+
+        return $articleScoreValues[ $submetricId ] ?? null;
+    }
 
     /**
      * @param Title $title
@@ -33,6 +50,8 @@ abstract class AbstractMetric extends AbstractJsonSchemaClass {
         if( !$title->exists() ) {
             return $articleScoreValues;
         }
+
+        $titleId = $title->getArticleID();
 
         $db = ArticleScores::getDB();
 
@@ -53,7 +72,7 @@ abstract class AbstractMetric extends AbstractJsonSchemaClass {
             'join_conds' => []
         ];
 
-        if( is_null( $this->titleScoreValues ) ) {
+        if( !isset( $this->titleScoreValues[ $titleId ] ) ) {
             $titleScoresCallback = function( $oldValue, &$ttl, array &$setOpts ) use ( $db, $queryInfo ) {
                 $titleScoreValues = [];
 
@@ -76,7 +95,7 @@ abstract class AbstractMetric extends AbstractJsonSchemaClass {
                     // submetric.
                     // TODO should be able to use some sort of subquery with GROUP BY to avoid returning old rows
                     if( !isset( $titleScoreValues[ $row->submetric_id ] ) && array_key_exists( $row->submetric_id, $submetrics ) ) {
-                        $titleScoreValues[ $row->submetric_id ] = new ArticleScoreValue( $row->value, true, false );
+                        $titleScoreValues[ $row->submetric_id ] = new ArticleScoreValue( $submetrics[ $row->submetric_id ], $row->value, true );
                     }
                 }
 
@@ -85,20 +104,20 @@ abstract class AbstractMetric extends AbstractJsonSchemaClass {
 
             $cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
 
-            $this->titleScoreValues = $cache->getWithSetCallback(
+            $this->titleScoreValues[ $titleId ] = $cache->getWithSetCallback(
                 $this->getCacheKey( $title ),
                 ArticleScores::CACHE_TTL,
                 $titleScoresCallback
             );
         }
 
-        $articleScoreValues = array_merge( $articleScoreValues, $this->titleScoreValues );
+        $articleScoreValues = array_merge( $articleScoreValues, $this->titleScoreValues[ $titleId ] );
 
         $user = RequestContext::getMain()->getUser();
 
         if( $includeUserscores && $user->isRegistered() ) {
-            if( is_null( $this->userScoreValues ) ) {
-                $this->userScoreValues = [];
+            if( !isset( $this->userScoreValues[ $titleId ] ) ) {
+                $this->userScoreValues[ $titleId ] = [];
 
                 unset( $queryInfo[ 'conds' ][ 'userscore' ] );
                 $queryInfo[ 'conds' ][] = '(userscore = 1 AND user_id = ' . $db->addQuotes( $user->getId() ) . ')';
@@ -120,19 +139,19 @@ abstract class AbstractMetric extends AbstractJsonSchemaClass {
                     // submetric.
                     // TODO should be able to use some sort of subquery with GROUP BY to avoid returning old rows
                     if( !isset( $titleValues[ $row->submetric_id ] ) && array_key_exists( $row->submetric_id, $submetrics ) ) {
-                        $this->userScoreValues[ $row->submetric_id ] = new ArticleScoreValue( $row->value, true, true );
+                        $this->userScoreValues[ $titleId ][ $row->submetric_id ] = new ArticleScoreValue( $submetrics[ $row->submetric_id ], $row->value, true );
                     }
                 }
             }
 
-            $articleScoreValues = array_merge( $articleScoreValues, $this->userScoreValues );
+            $articleScoreValues = array_merge( $articleScoreValues, $this->userScoreValues[ $titleId ] );
         }
 
         // Default values for undefined submetrics
         if( $includeDefaultValues ) {
             foreach( $this->getSubmetrics() as $submetricId => $submetric ) {
                 if( !isset( $articleScoreValues[ $submetricId] ) ) {
-                    $articleScoreValues[ $submetricId ] = new ArticleScoreValue( $submetric->defaultValue, false, $submetric->perUser );
+                    $articleScoreValues[ $submetricId ] = new ArticleScoreValue( $submetric, $submetric->getValueDefinition()->getDefault(), false );
                 }
             }
         }
@@ -162,6 +181,11 @@ abstract class AbstractMetric extends AbstractJsonSchemaClass {
         return $this->submetrics;
     }
 
+    public function getTopTitles( string $submetricId, int $limit, int $fromArticleId = 0 ): array {
+        // Might need to add an `archived` column to scores table to keep query efficient?
+        return [];
+    }
+
     /**
      * @param string $submetricId
      * @return bool
@@ -170,6 +194,9 @@ abstract class AbstractMetric extends AbstractJsonSchemaClass {
         return isset( $this->submetrics[ $submetricId ] );
     }
 
+    /**
+     * @return bool
+     */
     public function isEnabled(): bool {
         return true;
     }
@@ -186,25 +213,7 @@ abstract class AbstractMetric extends AbstractJsonSchemaClass {
             return false;
         }
 
-        if( !is_null( $submetric->maxValue ) ) {
-            if( $value > $submetric->maxValue ) {
-                return false;
-            }
-        }
-
-        if( !is_null( $submetric->minValue ) ) {
-            if( $value < $submetric->minValue ) {
-                return false;
-            }
-        }
-
-        if( !is_null( $submetric->maxValue ) && !is_null( $submetric->minValue ) && !is_null( $submetric->stepValue ) ) {
-            if( !in_array( $value, range( $submetric->minValue, $submetric->maxValue, $submetric->stepValue ) ) ) {
-                return false;
-            }
-        }
-
-        return true;
+        return $submetric->getValueDefinition()->isValueValid( $value );
     }
 
     /**
@@ -228,7 +237,7 @@ abstract class AbstractMetric extends AbstractJsonSchemaClass {
 
         $submetric = $this->getSubmetric( $submetricId );
 
-        if( $submetric->derivedValue ) {
+        if( $submetric->getValueDefinition()->isDerived() ) {
             $result->fatal(
                 ArticleScores::getExtensionName() . '-derivedvalueerror',
                 $this->getId(),
@@ -255,7 +264,7 @@ abstract class AbstractMetric extends AbstractJsonSchemaClass {
     public function userCanSetArticleScore( Title $title, string $submetricId = ArticleScores::DEFAULT_SUBMETRIC ): bool {
         $submetric = $this->getSubmetric( $submetricId );
 
-        if( !$submetric ) {
+        if( !$submetric || $submetric->getValueDefinition()->isDerived() ) {
             return false;
         }
 
@@ -268,10 +277,10 @@ abstract class AbstractMetric extends AbstractJsonSchemaClass {
         }
 
         // If a right is defined, make sure the user has that right. Otherwise allow.
-        if( $submetric->requiresRight ) {
+        if( $submetric->requiresRight() ) {
             return $permissionManager->userHasRight(
                 $user,
-                $submetric->requiresRight
+                $submetric->requiresRight()
             );
         }
 
@@ -288,6 +297,8 @@ abstract class AbstractMetric extends AbstractJsonSchemaClass {
         $result = Status::newGood();
 
         $user = RequestContext::getMain()->getUser();
+        $submetric = $this->getSubmetric( $submetricId );
+        $valueDefinition = $submetric->getValueDefinition();
 
         if( !$user->isRegistered() ) {
             $result->fatal(
@@ -310,7 +321,7 @@ abstract class AbstractMetric extends AbstractJsonSchemaClass {
             );
 
             return $result;
-        } elseif( !$this->userCanSetArticleScore( $title, $submetricId ) ) {
+        } elseif( !$this->userCanSetArticleScore( $title, $submetricId ) && !$valueDefinition->isDerived() ) {
             $result->fatal(
                 ArticleScores::getExtensionName() . '-permissiondenied'
             );
@@ -329,21 +340,19 @@ abstract class AbstractMetric extends AbstractJsonSchemaClass {
 
         $db = ArticleScores::getDB( DB_MASTER );
 
-        $submetric = $this->getSubmetric( $submetricId );
-
         $row = [
             'page_id' => $title->getArticleID(),
             'metric_id' => $this->getId(),
             'submetric_id' => $submetricId,
-            'userscore' => $submetric->perUser,
+            'userscore' => $submetric->isPerUser(),
             'user_id' => $user->getId()
         ];
 
         // If the metric does not keep a history of score changes, remove old rows from the database
-        if( !$submetric->keepHistory ) {
+        if( !$submetric->keepHistory() ) {
             $deleteConds = $row;
 
-            if( !$submetric->perUser ) {
+            if( !$submetric->isPerUser() ) {
                 // If the score is not per user, remove the user_id condition
                 unset( $deleteConds[ 'user_id' ] );
             }
@@ -356,22 +365,24 @@ abstract class AbstractMetric extends AbstractJsonSchemaClass {
             );
         }
 
-        $row[ 'value' ] = $value;
-        $row[ 'timestamp' ] = MWTimestamp::now();
+        if( $submetric->keepHistory() || ( is_null( $valueDefinition->getUnset() ) || $value != $valueDefinition->getUnset() ) ) {
+            $row[ 'value' ] = $value;
+            $row[ 'timestamp' ] = MWTimestamp::now();
 
-        $db->insert(
-            'articlescores_scores',
-            $row,
-            __METHOD__
-        );
-
-        if( $db->affectedRows() !== 1 ) {
-            $result->fatal(
-                ArticleScores::getExtensionName() . '-databaseerror',
-                $db->lastError()
+            $db->insert(
+                'articlescores_scores',
+                $row,
+                __METHOD__
             );
 
-            return $result;
+            if( $db->affectedRows() !== 1 ) {
+                $result->fatal(
+                    ArticleScores::getExtensionName() . '-databaseerror',
+                    $db->lastError()
+                );
+
+                return $result;
+            }
         }
 
         return $result;
@@ -421,6 +432,11 @@ abstract class AbstractMetric extends AbstractJsonSchemaClass {
         return $values;
     }
 
+    /**
+     * @param Title $title
+     * @param string $submetricId
+     * @return mixed
+     */
     protected function getUpdatedDerivedValue( Title $title, string $submetricId ) {
         return false;
     }
@@ -432,7 +448,9 @@ abstract class AbstractMetric extends AbstractJsonSchemaClass {
     protected function postprocessDefinition( array &$definition ) {
         // Create a Submetric instance for each submetric
         foreach( $definition[ 'score' ] as $submetricId => $submetricDefinition ) {
-            $this->submetrics[ $submetricId ] = new Submetric( $submetricDefinition );
+            $submetricDefinition[ 'id' ] = $submetricId;
+
+            $this->submetrics[ $submetricId ] = new Submetric( $submetricDefinition, $this );
         }
     }
 
@@ -440,20 +458,19 @@ abstract class AbstractMetric extends AbstractJsonSchemaClass {
         $cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
         $cache->delete( $this->getCacheKey( $title ) );
 
-        // Clear cache of page
-        $page = WikiPage::factory( $title );
-        $page->doPurge();
+        unset( $this->titleScoreValues[ $title->getArticleID() ] );
+        unset( $this->userScoreValues[ $title->getArticleID() ] );
     }
 
     protected function updateDerivedValues( Title $title ) {
         $submetrics = $this->getSubmetrics();
 
         foreach( $submetrics as $submetricId => $submetric ) {
-            if( $submetric->derivedValue ) {
-                $updatedValue = $this->getUpdatedDerivedValue( $title, $submetricId );
+            if( $submetric->getValueDefinition()->isDerived() ) {
+                $updatedDerivedValue = $this->getUpdatedDerivedValue( $title, $submetricId );
 
-                if( $updatedValue !== false ) {
-                    $this->doSetArticleScoreValue( $title, $updatedValue, $submetricId );
+                if( $updatedDerivedValue !== false ) {
+                    $this->doSetArticleScoreValue( $title, $updatedDerivedValue, $submetricId );
                 }
             }
         }

@@ -49,12 +49,12 @@ class ApiArticleScoresGetScores extends ApiArticleScoresBaseGet {
             'userscores' => [
                 ApiBase::PARAM_REQUIRED => false,
                 ApiBase::PARAM_TYPE => 'integer',
-                ParamValidator::PARAM_DEFAULT => 0
+                ParamValidator::PARAM_DEFAULT => 1
             ],
             'defaults' => [
                 ApiBase::PARAM_REQUIRED => false,
                 ApiBase::PARAM_TYPE => 'integer',
-                ParamValidator::PARAM_DEFAULT => 0
+                ParamValidator::PARAM_DEFAULT => 1
             ]
         ];
     }

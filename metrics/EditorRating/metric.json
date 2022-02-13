@@ -6,12 +6,30 @@
   ],
   "score": {
     "main": {
-      "DefaultValue": 0,
-      "MinValue": 0,
-      "MaxValue": 5,
-      "StepValue": 1,
+      "value": {
+        "default": "0",
+        "unset": "0",
+        "options": {
+          "0": {
+            "icon": "far fa-circle"
+          },
+          "1": {
+            "icon": "fas fa-adjust fa-rotate-270"
+          },
+          "2": {
+            "icon": "fas fa-circle"
+          },
+          "3": {
+            "icon": "fas fa-check-circle"
+          }
+        }
+      },
+      "KeepHistory": true,
       "RequiresRight": "articlescores-editorrating"
     }
+  },
+  "config": {
+    "IconColor": "black"
   },
   "AvailableRights": [
     "articlescores-editorrating"
@@ -23,5 +41,25 @@
   },
   "MessagesDirs": [
     "i18n"
-  ]
+  ],
+  "ResourceModules": {
+    "ext.articleScores.editorRating": {
+      "scripts": [
+        "articleScores.editorRating/articleScores.editorRating.js"
+      ],
+      "styles": [
+        "articleScores.editorRating/articleScores.editorRating.less"
+      ],
+      "dependencies": [
+        "ext.articleScores.common"
+      ],
+      "messages": [
+        "articlescores-editorrating-unrated"
+      ]
+    }
+  },
+  "ResourceFileModulePaths": {
+    "localBasePath": "modules",
+    "remoteExtPath": "ArticleScores/metrics/EditorRating/modules"
+  }
 }

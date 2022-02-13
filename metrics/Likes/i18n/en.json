@@ -1,0 +1,13 @@
+{
+  "@metadata": {
+    "authors": [
+      "Chris Rishel"
+    ]
+  },
+  "articlescores-likes-name": "User likes",
+  "articlescores-likes-desc": "User like/dislike rating of article (set by users with the articlescores-editorrating right).",
+  "articlescores-likes-like": "Like",
+  "articlescores-likes-liked": "Liked",
+  "articlescores-likes-dislike": "Dislike",
+  "articlescores-likes-disliked": "Disliked"
+}

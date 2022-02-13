@@ -16,8 +16,8 @@
   "callback": "MediaWiki\\Extension\\ArticleScores\\ArticleScores::initialize",
   "config_prefix": "wg",
   "config": {
-    "ArticleScoresMetric": {
-      "value": "rating"
+    "ArticleScoresConfig": {
+      "value": []
     }
   },
   "AutoloadNamespaces": {
@@ -44,6 +44,21 @@
       "i18n",
       "i18n/api"
     ]
+  },
+  "ResourceModules": {
+    "ext.articleScores.common": {
+      "scripts": [
+        "articleScores.common/articleScores.common.js"
+      ],
+      "styles": [
+        "articleScores.common/articleScores.common.less"
+      ],
+      "messages": []
+    }
+  },
+  "ResourceFileModulePaths": {
+    "localBasePath": "modules",
+    "remoteExtPath": "ArticleScores/modules"
   },
   "SpecialPages": {
     "ArticleScores": "MediaWiki\\Extension\\ArticleScores\\Special\\SpecialArticleScores"

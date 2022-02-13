@@ -69,6 +69,8 @@ class ApiArticleScoresSetScore extends ApiArticleScoresBaseGet {
             return;
         }
 
+        $output[ $asaction ][ 'value' ] = $metric->getArticleScoreValue( $title, $submetricId );
+
         $this->getResult()->addValue( null, $this->apiArticleScores->getModuleName(), $output );
     }
 

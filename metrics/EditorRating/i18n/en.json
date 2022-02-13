@@ -4,6 +4,16 @@
       "Chris Rishel"
     ]
   },
-  "articlescores-rating-name": "Editor rating",
-  "articlescores-rating-desc": "Editor rating of an article (set by users with the articlescores-editorrating right)."
+  "articlescores-editorrating-name": "Editor rating",
+  "articlescores-editorrating-desc": "Editor rating of an article (set by users with the articlescores-editorrating right).",
+  "articlescores-editorrating-changerating": "Set to",
+  "articlescores-editorrating-unrated": "Unrated",
+  "articlescores-editorrating-main-0-name": "Unrated",
+  "articlescores-editorrating-main-0-desc": "This article contains minimal content and has not yet been rated by an editor",
+  "articlescores-editorrating-main-1-name": "In development",
+  "articlescores-editorrating-main-1-desc": "This article contains quality content but is not yet considered comprehensive by editor review",
+  "articlescores-editorrating-main-2-name": "Comprehensive",
+  "articlescores-editorrating-main-2-desc": "This article is considered comprehensive but opportunities for improvement remain by editor review",
+  "articlescores-editorrating-main-3-name": "Certified",
+  "articlescores-editorrating-main-3-desc": "This article is considered comprehensive and is exemplary in terms of content, clarity, organization, and supporting media"
 }
