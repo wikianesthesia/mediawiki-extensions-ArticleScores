@@ -35,6 +35,12 @@ class ArticleScores {
      */
     protected static $metricsLocalDirectory;
 
+    /**
+     * @var bool
+     */
+    protected static $useLinkFlair = false;
+
+
 
     public static function getArticleScoresForPageId( int $pageId, bool $includeUserscores = false, bool $includeDefaultValues = false ): array {
         $articleScores = [];
@@ -82,6 +88,23 @@ class ArticleScores {
      */
     public static function getExtensionName(): string {
         return 'ArticleScores';
+    }
+
+
+    public static function getLinkFlairForPageId( int $pageId ): string {
+        $linkFlair = '';
+
+        $title = Title::newFromID( $pageId );
+
+        if( !$title || !$title->exists() ) {
+            return $linkFlair;
+        }
+
+        foreach( static::getMetrics() as $metric ) {
+            $linkFlair .= $metric->getLinkFlairHtml( $title );
+        }
+
+        return $linkFlair;
     }
 
 
@@ -137,6 +160,11 @@ class ArticleScores {
     }
 
 
+    public static function getUseLinkFlair(): bool {
+        return static::$useLinkFlair;
+    }
+
+
 
     /**
      *
@@ -144,5 +172,10 @@ class ArticleScores {
     public static function initialize() {
         static::$classManager = MediaWikiServices::getInstance()->get( 'JsonSchemaClassManager' );
         static::$classManager->registerSchema(MetricSchema::class );
+    }
+
+
+    public static function setUseLinkFlair( bool $useLinkFlair = false ) {
+        static::$useLinkFlair = $useLinkFlair;
     }
 }

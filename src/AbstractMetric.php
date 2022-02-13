@@ -159,6 +159,10 @@ abstract class AbstractMetric extends AbstractJsonSchemaClass {
         return $articleScoreValues;
     }
 
+    public function getLinkFlairHtml( Title $title ): string {
+        return '';
+    }
+
     /**
      * @return string
      */
