@@ -11,16 +11,16 @@
         "unset": "0",
         "options": {
           "0": {
-            "icon": "far fa-circle"
+            "icon": "far fa-circle fa-sm"
           },
           "1": {
-            "icon": "fas fa-adjust fa-rotate-270"
+            "icon": "fas fa-adjust fa-rotate-270 fa-sm"
           },
           "2": {
-            "icon": "fas fa-circle"
+            "icon": "fas fa-circle fa-sm"
           },
           "3": {
-            "icon": "fas fa-check-circle"
+            "icon": "fas fa-check-circle fa-sm"
           }
         }
       },
