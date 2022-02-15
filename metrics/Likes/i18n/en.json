@@ -9,5 +9,8 @@
   "articlescores-likes-like": "Like",
   "articlescores-likes-liked": "Liked",
   "articlescores-likes-dislike": "Dislike",
-  "articlescores-likes-disliked": "Disliked"
+  "articlescores-likes-disliked": "Disliked",
+  "logentry-articlescores-like": "$1 liked $3",
+  "logentry-articlescores-dislike": "$1 disliked $3",
+  "logentry-articlescores-unlike": "$1 removed like setting for $3"
 }

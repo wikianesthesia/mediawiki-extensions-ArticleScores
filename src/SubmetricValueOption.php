@@ -110,7 +110,7 @@ class SubmetricValueOption {
                 if( $defaultMsg->exists() ) {
                     $this->name = $defaultMsg->text();
                 } else {
-                    $this->name = '';
+                    $this->name = $this->value;
                 }
             }
         }

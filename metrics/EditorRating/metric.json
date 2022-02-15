@@ -24,7 +24,6 @@
           }
         }
       },
-      "KeepHistory": true,
       "RequiresRight": "articlescores-editorrating"
     }
   },

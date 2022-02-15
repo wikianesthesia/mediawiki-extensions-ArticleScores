@@ -9,14 +9,14 @@ class Submetric {
     protected $_metric;
 
     /**
-     * @var bool
-     */
-    protected $keepHistory;
-
-    /**
      * @var string
      */
     protected $id;
+
+    /**
+     * @var bool
+     */
+    protected $logEvents;
 
     /**
      * @var bool
@@ -41,7 +41,7 @@ class Submetric {
 
         $this->id = $definition[ 'id' ];
 
-        $this->keepHistory = (bool) ( $definition[ 'KeepHistory' ] ?? null );
+        $this->logEvents = (bool) ( $definition[ 'LogEvents' ] ?? true );
         $this->perUser = (bool) ( $definition[ 'PerUser' ] ?? null );
         $this->requiresRight = $definition[ 'RequiresRight' ] ?? null;
 
@@ -88,8 +88,8 @@ class Submetric {
     /**
      * @return bool
      */
-    public function keepHistory(): bool {
-        return $this->keepHistory;
+    public function logEvents(): bool {
+        return $this->logEvents;
     }
 
     /**

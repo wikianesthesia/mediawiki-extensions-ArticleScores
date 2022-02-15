@@ -136,6 +136,16 @@ class Likes extends AbstractMetric {
         return false;
     }
 
+    protected function getLogAction( $value, string $submetricId = ArticleScores::DEFAULT_SUBMETRIC ): string {
+        if( $value == 1 ) {
+            return 'like';
+        } elseif( $value == -1 ) {
+            return 'dislike';
+        } else {
+            return 'unlike';
+        }
+    }
+
     /**
      * @param array $definition
      */

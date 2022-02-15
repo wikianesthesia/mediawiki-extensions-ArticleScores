@@ -3,14 +3,13 @@
 namespace MediaWiki\Extension\ArticleScores;
 
 use Database;
+use ManualLogEntry;
 use MediaWiki\Extension\JsonSchemaClasses\AbstractJsonSchemaClass;
 use MediaWiki\MediaWikiServices;
 use MWTimestamp;
 use RequestContext;
 use Status;
 use Title;
-use User;
-use WikiPage;
 
 abstract class AbstractMetric extends AbstractJsonSchemaClass {
     /**
@@ -253,6 +252,34 @@ abstract class AbstractMetric extends AbstractJsonSchemaClass {
 
         $result = $this->doSetArticleScoreValue( $title, $value, $submetricId );
 
+        if( $result->isOK() && $submetric->logEvents() ) {
+            $logAction = $this->getLogAction( $value, $submetricId );
+
+            $logEntry = new ManualLogEntry( 'articlescores', $logAction );
+            $logEntry->setPerformer( RequestContext::getMain()->getUser() );
+            $logEntry->setTarget( $title );
+
+            $logMetric = $this->getName();
+
+            if( $submetricId !== ArticleScores::DEFAULT_SUBMETRIC ) {
+                $logMetric .= ' (' . $submetricId . ')';
+            }
+
+            $logValue = $submetric->getValueDefinition()->hasOptions() ?
+                $submetric->getValueDefinition()->getOption( $value )->getName() :
+                $value;
+
+            $logParams = [
+                '4::metric' => $logMetric,
+                '5::value' => $logValue
+            ];
+
+            $logEntry->setParameters( $logParams );
+
+            $logId = $logEntry->insert();
+            $logEntry->publish( $logId );
+        }
+
         $this->updateDerivedValues( $title );
 
         $this->purgeTitle( $title );
@@ -344,38 +371,35 @@ abstract class AbstractMetric extends AbstractJsonSchemaClass {
 
         $db = ArticleScores::getDB( DB_MASTER );
 
-        $row = [
+        $conds = [
             'page_id' => $title->getArticleID(),
             'metric_id' => $this->getId(),
             'submetric_id' => $submetricId,
-            'userscore' => $submetric->isPerUser(),
             'user_id' => $user->getId()
         ];
 
-        // If the metric does not keep a history of score changes, remove old rows from the database
-        if( !$submetric->keepHistory() ) {
-            $deleteConds = $row;
+        $set = [
+            'userscore' => $submetric->isPerUser(),
+            'value' => $value,
+            'timestamp' => MWTimestamp::now()
+        ];
 
-            if( !$submetric->isPerUser() ) {
-                // If the score is not per user, remove the user_id condition
-                unset( $deleteConds[ 'user_id' ] );
-            }
-
-            // TODO error handling
-            $db->delete(
-                'articlescores_scores',
-                $deleteConds,
-                __METHOD__
-            );
+        if( !$submetric->isPerUser() ) {
+            $set[ 'user_id' ] = $conds[ 'user_id' ];
+            unset( $conds[ 'user_id' ] );
         }
 
-        if( $submetric->keepHistory() || ( is_null( $valueDefinition->getUnset() ) || $value != $valueDefinition->getUnset() ) ) {
-            $row[ 'value' ] = $value;
-            $row[ 'timestamp' ] = MWTimestamp::now();
-
-            $db->insert(
+        if( !is_null( $valueDefinition->getUnset() ) && $value == $valueDefinition->getUnset() ) {
+            $db->delete(
                 'articlescores_scores',
-                $row,
+                $conds,
+                __METHOD__
+            );
+        } else {
+            $db->upsert( 'articlescores_scores',
+                array_merge( $conds, $set ),
+                [ array_keys( $conds ) ],
+                $set,
                 __METHOD__
             );
 
@@ -398,42 +422,15 @@ abstract class AbstractMetric extends AbstractJsonSchemaClass {
         return $cache->makeKey( static::class, $title->getArticleID() );
     }
 
+    protected function getLogAction( $value, string $submetricId = ArticleScores::DEFAULT_SUBMETRIC ): string {
+        return 'set';
+    }
+
     /**
      * @return string
      */
     protected function getSchemaClass(): string {
         return MetricSchema::class;
-    }
-
-    /**
-     * @param array $queryInfo
-     * @return array
-     */
-    protected function getScoreValuesFromQueryInfo( array $queryInfo ): array {
-        $values = [];
-
-        $db = ArticleScores::getDB();
-
-        $res = $db->select(
-            $queryInfo[ 'tables' ],
-            $queryInfo[ 'vars' ],
-            $queryInfo[ 'conds' ],
-            __METHOD__,
-            $queryInfo[ 'options' ],
-            $queryInfo[ 'join_conds']
-        );
-
-        foreach( $res as $row ) {
-            if( isset( $values[ $row->submetric ] ) ) {
-                // The most recent (i.e. relevant) value for each submetric will be returned first due to ORDER BY
-                // TODO should be able to use some sort of subquery with GROUP BY to avoid returning old rows
-                continue;
-            }
-
-            $values[ $row->submetric ] = $row->value;
-        }
-
-        return $values;
     }
 
     /**

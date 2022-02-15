@@ -40,6 +40,12 @@
       "class": "MediaWiki\\Extension\\ArticleScores\\Hook\\HookHandler"
     }
   },
+  "LogTypes": [
+    "articlescores"
+  ],
+  "LogActionsHandlers": {
+    "articlescores/*": "LogFormatter"
+  },
   "MessagesDirs": {
     "ArticleScores": [
       "i18n",
