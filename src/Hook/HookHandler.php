@@ -8,6 +8,7 @@ use MediaWiki\Extension\ArticleScores\ArticleScores;
 use MediaWiki\Extension\JsonSchemaClasses\ClassRegistry;
 use MediaWiki\Installer\Hook\LoadExtensionSchemaUpdatesHook;
 use MediaWiki\Hook\ParserFirstCallInitHook;
+use MediaWiki\Hook\SidebarBeforeOutputHook;
 use MediaWiki\Hook\SkinTemplateNavigation__UniversalHook;
 use MediaWiki\Linker\Hook\HtmlPageLinkRendererEndHook;
 use RequestContext;
@@ -18,6 +19,7 @@ class HookHandler implements
     HtmlPageLinkRendererEndHook,
     LoadExtensionSchemaUpdatesHook,
     ParserFirstCallInitHook,
+    SidebarBeforeOutputHook,
     SkinTemplateNavigation__UniversalHook{
 
     public function onArticleScoresRegisterMetrics( ClassRegistry $metricRegistry ) {
@@ -89,6 +91,21 @@ class HookHandler implements
     public function onParserFirstCallInit( $parser ) {
         $parser->setHook( 'articlescores', 'MediaWiki\\Extension\\ArticleScores\\Parser\\ArticleScores::render' );
         $parser->setHook( 'articlescoreslinkflair', 'MediaWiki\\Extension\\ArticleScores\\Parser\\ArticleScoresLinkFlair::render' );
+    }
+
+    public function onSidebarBeforeOutput( $skin, &$sidebar ): void {
+        global $wgArticleScoresTopArticlesDefaultMetric;
+
+        $target = 'ArticleScores';
+
+        if( $wgArticleScoresTopArticlesDefaultMetric ) {
+            $target .= '/' . $wgArticleScoresTopArticlesDefaultMetric;
+        }
+
+        $sidebar[ 'TOOLBOX' ][ 'articlescores' ] = [
+            'text' => wfMessage( 'articlescores-toparticles' )->text(),
+            'href' => $skin::makeSpecialUrl( $target )
+        ];
     }
 
     public function onSkinTemplateNavigation__Universal( $sktemplate, &$links ): void {

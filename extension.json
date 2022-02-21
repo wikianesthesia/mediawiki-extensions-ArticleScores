@@ -40,6 +40,7 @@
     "HtmlPageLinkRendererEnd": "main",
     "LoadExtensionSchemaUpdates": "main",
     "ParserFirstCallInit": "main",
+    "SidebarBeforeOutput": "main",
     "SkinTemplateNavigation::Universal": "main"
   },
   "HookHandlers": {

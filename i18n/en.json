@@ -19,6 +19,7 @@
   "articlescores-nouser": "User not logged in.",
   "articlescores-permissiondenied": "Permission denied.",
   "articlescores-timestamp": "Date/time",
+  "articlescores-toparticles": "Top articles",
   "articlescores-valuenotvalid": "Invalid value \"$1\" for metric \"$2\" and submetric \"$3\".",
   "log-name-articlescores": "Article scores log",
   "log-description-articlescores": "This is a log of changes to article scores",
