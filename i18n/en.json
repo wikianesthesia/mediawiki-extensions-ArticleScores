@@ -7,6 +7,8 @@
   "articlescores": "Article Scores",
   "articlescores-extensionname": "ArticleScores",
   "articlescores-desc": "Adds the ability to score article quality using modular metrics.",
+  "articlescores-action": "Score",
+  "articlescores-action-title": "Article scores for $1",
   "articlescores-article": "Article",
   "articlescores-databaseerror": "Database error: $1",
   "articlescores-derivedvalueerror": "Cannot directly set value for metric \"$1\" and submetric \"$2\"",

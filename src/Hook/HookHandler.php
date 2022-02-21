@@ -8,6 +8,7 @@ use MediaWiki\Extension\ArticleScores\ArticleScores;
 use MediaWiki\Extension\JsonSchemaClasses\ClassRegistry;
 use MediaWiki\Installer\Hook\LoadExtensionSchemaUpdatesHook;
 use MediaWiki\Hook\ParserFirstCallInitHook;
+use MediaWiki\Hook\SkinTemplateNavigation__UniversalHook;
 use MediaWiki\Linker\Hook\HtmlPageLinkRendererEndHook;
 use RequestContext;
 use Title;
@@ -16,7 +17,8 @@ class HookHandler implements
     ArticleScoresRegisterMetricsHook,
     HtmlPageLinkRendererEndHook,
     LoadExtensionSchemaUpdatesHook,
-    ParserFirstCallInitHook {
+    ParserFirstCallInitHook,
+    SkinTemplateNavigation__UniversalHook{
 
     public function onArticleScoresRegisterMetrics( ClassRegistry $metricRegistry ) {
         $metricRegistry->register( ArticleScores::getMetricsLocalDirectory(), true );
@@ -87,5 +89,19 @@ class HookHandler implements
     public function onParserFirstCallInit( $parser ) {
         $parser->setHook( 'articlescores', 'MediaWiki\\Extension\\ArticleScores\\Parser\\ArticleScores::render' );
         $parser->setHook( 'articlescoreslinkflair', 'MediaWiki\\Extension\\ArticleScores\\Parser\\ArticleScoresLinkFlair::render' );
+    }
+
+    public function onSkinTemplateNavigation__Universal( $sktemplate, &$links ): void {
+        $title = $sktemplate->getRelevantTitle();
+
+        if( ArticleScores::canTitleHaveArticleScore( $title ) ) {
+            $request = $sktemplate->getRequest();
+
+            $links[ 'actions' ][ 'score' ] = [
+                'class' => $request->getVal( 'action' ) === 'score' ? 'selected' : false,
+                'text' => wfMessage( 'articlescores-action' )->text(),
+                'href' => $title->getLocalURL( 'action=score' )
+            ];
+        }
     }
 }

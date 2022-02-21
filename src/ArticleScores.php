@@ -42,12 +42,30 @@ class ArticleScores {
 
 
 
+    public static function canTitleHaveArticleScore( Title $title ): bool {
+        global $wgArticleScoresEnabledNamespaces;
+
+        if( !$title ||
+            !$title->exists() ||
+            !in_array( $title->getNamespace(), $wgArticleScoresEnabledNamespaces )) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @param int $pageId
+     * @param bool $includeUserscores
+     * @param bool $includeDefaultValues
+     * @return array
+     */
     public static function getArticleScoresForPageId( int $pageId, bool $includeUserscores = false, bool $includeDefaultValues = false ): array {
         $articleScores = [];
 
         $title = Title::newFromID( $pageId );
 
-        if( !$title || !$title->exists() ) {
+        if( !static::canTitleHaveArticleScore( $title ) ) {
             return $articleScores;
         }
 
@@ -92,15 +110,11 @@ class ArticleScores {
 
 
     public static function getLinkFlairForPageId( int $pageId ): string {
-        global $wgArticleScoresLinkFlairIncludeNamespaces;
-
         $linkFlair = '';
 
         $title = Title::newFromID( $pageId );
 
-        if( !$title ||
-            !$title->exists() ||
-            ( is_array( $wgArticleScoresLinkFlairIncludeNamespaces ) && !in_array( $title->getNamespace(), $wgArticleScoresLinkFlairIncludeNamespaces ) ) ) {
+        if( !static::canTitleHaveArticleScore( $title ) ) {
             return $linkFlair;
         }
 

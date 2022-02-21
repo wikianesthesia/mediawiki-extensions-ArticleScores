@@ -19,8 +19,11 @@
     "ArticleScoresConfig": {
       "value": []
     },
-    "ArticleScoresLinkFlairIncludeNamespace": {
+    "ArticleScoresEnabledNamespaces": {
       "value": [ 0 ]
+    },
+    "ArticleScoresTopArticlesDefaultMetric": {
+      "value": ""
     }
   },
   "AutoloadNamespaces": {
@@ -36,7 +39,8 @@
     "ArticleScoresRegisterMetrics": "main",
     "HtmlPageLinkRendererEnd": "main",
     "LoadExtensionSchemaUpdates": "main",
-    "ParserFirstCallInit": "main"
+    "ParserFirstCallInit": "main",
+    "SkinTemplateNavigation::Universal": "main"
   },
   "HookHandlers": {
     "main": {
