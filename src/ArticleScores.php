@@ -92,11 +92,15 @@ class ArticleScores {
 
 
     public static function getLinkFlairForPageId( int $pageId ): string {
+        global $wgArticleScoresLinkFlairIncludeNamespaces;
+
         $linkFlair = '';
 
         $title = Title::newFromID( $pageId );
 
-        if( !$title || !$title->exists() ) {
+        if( !$title ||
+            !$title->exists() ||
+            ( is_array( $wgArticleScoresLinkFlairIncludeNamespaces ) && !in_array( $title->getNamespace(), $wgArticleScoresLinkFlairIncludeNamespaces ) ) ) {
             return $linkFlair;
         }
 

@@ -18,6 +18,9 @@
   "config": {
     "ArticleScoresConfig": {
       "value": []
+    },
+    "ArticleScoresLinkFlairIncludeNamespace": {
+      "value": [ 0 ]
     }
   },
   "AutoloadNamespaces": {
