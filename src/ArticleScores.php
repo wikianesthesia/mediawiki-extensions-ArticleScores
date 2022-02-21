@@ -11,7 +11,7 @@ use Wikimedia\Rdbms\DBConnRef;
 use WANObjectCache;
 
 class ArticleScores {
-    public const CACHE_TTL = WANObjectCache::TTL_SECOND;
+    public const CACHE_TTL = WANObjectCache::TTL_DAY;
     public const DEFAULT_SUBMETRIC = 'main';
     protected const SCHEMA_CLASS = MetricSchema::class;
 
