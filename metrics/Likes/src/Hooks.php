@@ -16,7 +16,7 @@ class Hooks {
             array_slice( $personal_urls, 0, count( $personal_urls ) - 1, true ), [
             'likes' => [
                 'text' => wfMessage( 'articlescores-likes-mylikes' )->text(),
-                'href' => Title::newFromText( 'Special:ArticleScores/Likes/user' )->getLinkURL( 'value=0' )
+                'href' => Title::newFromText( 'Special:ArticleScores/Likes/user' )->getLinkURL( 'value=0&timestamp=1' )
             ] ],
             array_slice( $personal_urls, count( $personal_urls ) - 1, 1, true )
         );

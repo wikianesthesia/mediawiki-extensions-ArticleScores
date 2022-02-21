@@ -24,12 +24,12 @@ class SpecialArticleScores extends IncludableSpecialPage {
     /**
      * @var int
      */
-    protected $limit = 10;
+    protected $limit = 25;
 
     /**
      * @var bool
      */
-    protected $showTimestamp = true;
+    protected $showTimestamp = false;
 
     /**
      * @var bool
@@ -46,6 +46,9 @@ class SpecialArticleScores extends IncludableSpecialPage {
 
     public function execute( $subPage ) {
         $this->setHeaders();
+
+        // Set default limit depending on whether page is being included or not
+        $this->limit = $this->including() ? 10 : 25;
 
         $this->initialize( $subPage );
 
@@ -121,6 +124,7 @@ class SpecialArticleScores extends IncludableSpecialPage {
             $this->submetric,
             $userId,
             [
+                'limit' => $this->limit,
                 'value' => $this->showValue,
                 'timestamp' => $this->showTimestamp
             ]

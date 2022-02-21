@@ -18,6 +18,7 @@ class ArticleScoresTablePager extends TablePager {
         Submetric $submetric,
         int $userId = 0,
         array $options = [
+            'limit' => 10,
             'value' => true,
             'timestamp' => true
         ],
@@ -31,6 +32,8 @@ class ArticleScoresTablePager extends TablePager {
         $this->submetric = $submetric;
         $this->userId = $userId;
         $this->options = $options;
+
+        $this->setLimit( $this->options[ 'limit' ] );
 
         $this->mDefaultDirection = true;
 
