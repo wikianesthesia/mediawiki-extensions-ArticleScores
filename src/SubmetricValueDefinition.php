@@ -139,6 +139,16 @@ class SubmetricValueDefinition {
     }
 
     /**
+     * @param $value
+     * @return string
+     */
+    public function getValueString( $value ) {
+        return $this->hasOptions() ?
+            $this->getOption( $value )->getName() :
+            (string) $value;
+    }
+
+    /**
      * @return bool
      */
     public function hasOptions(): bool {

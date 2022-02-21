@@ -46,6 +46,9 @@
   "config": {
     "EnableDislikes": false
   },
+  "AutoloadClasses": {
+    "MediaWiki\\Extension\\ArticleScores\\Metric\\Likes\\Hooks": "src/Hooks.php"
+  },
   "AvailableRights": [
     "articlescores-like"
   ],
@@ -56,6 +59,9 @@
     "user": {
       "articlescores-like": true
     }
+  },
+  "Hooks": {
+    "PersonalUrls": "MediaWiki\\Extension\\ArticleScores\\Metric\\Likes\\Hooks::onPersonalUrls"
   },
   "MessagesDirs": [
     "i18n"

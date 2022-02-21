@@ -259,18 +259,10 @@ abstract class AbstractMetric extends AbstractJsonSchemaClass {
             $logEntry->setPerformer( RequestContext::getMain()->getUser() );
             $logEntry->setTarget( $title );
 
-            $logMetric = $this->getName();
-
-            if( $submetricId !== ArticleScores::DEFAULT_SUBMETRIC ) {
-                $logMetric .= ' (' . $submetricId . ')';
-            }
-
-            $logValue = $submetric->getValueDefinition()->hasOptions() ?
-                $submetric->getValueDefinition()->getOption( $value )->getName() :
-                $value;
+            $logValue = $submetric->getValueDefinition()->getValueString( $value );
 
             $logParams = [
-                '4::metric' => $logMetric,
+                '4::metric' => $submetric->getName(),
                 '5::value' => $logValue
             ];
 
@@ -371,35 +363,34 @@ abstract class AbstractMetric extends AbstractJsonSchemaClass {
 
         $db = ArticleScores::getDB( DB_MASTER );
 
-        $conds = [
+        $rowConds = [
             'page_id' => $title->getArticleID(),
             'metric_id' => $this->getId(),
             'submetric_id' => $submetricId,
-            'user_id' => $user->getId()
+            'user_id' => $user->getId(),
         ];
 
-        $set = [
+        $rowValues = [
             'userscore' => $submetric->isPerUser(),
             'value' => $value,
             'timestamp' => MWTimestamp::now()
         ];
 
         if( !$submetric->isPerUser() ) {
-            $set[ 'user_id' ] = $conds[ 'user_id' ];
-            unset( $conds[ 'user_id' ] );
+            $rowValues[ 'user_id' ] = $rowConds[ 'user_id' ];
+            unset( $rowConds[ 'user_id' ] );
         }
 
-        if( !is_null( $valueDefinition->getUnset() ) && $value == $valueDefinition->getUnset() ) {
-            $db->delete(
+        $db->delete(
+            'articlescores_scores',
+            $rowConds,
+            __METHOD__
+        );
+
+        if( is_null( $valueDefinition->getUnset() ) || $value != $valueDefinition->getUnset() ) {
+            $db->insert(
                 'articlescores_scores',
-                $conds,
-                __METHOD__
-            );
-        } else {
-            $db->upsert( 'articlescores_scores',
-                array_merge( $conds, $set ),
-                [ array_keys( $conds ) ],
-                $set,
+                array_merge( $rowConds, $rowValues ),
                 __METHOD__
             );
 

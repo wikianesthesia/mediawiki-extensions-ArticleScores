@@ -114,7 +114,7 @@ class Likes extends AbstractMetric {
             if( $submetricId === 'main' ) {
                 $vars = 'SUM(value) as value';
             } elseif( $submetricId === 'likes' || $submetricId === 'dislikes' ) {
-                $vars = 'COUNT(score_id) as value';
+                $vars = 'COUNT(value) as value';
 
                 $conds[ 'value' ] = $submetricId === 'likes' ? 1 : -1;
             } elseif( $submetricId === 'percentLikes' ) {
