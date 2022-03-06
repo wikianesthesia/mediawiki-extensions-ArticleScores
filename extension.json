@@ -11,9 +11,10 @@
   "type": "other",
   "requires": {
     "MediaWiki": ">= 1.35.0",
-    "extensions": {}
+    "extensions": {
+      "JsonClasses": "*"
+    }
   },
-  "callback": "MediaWiki\\Extension\\ArticleScores\\ArticleScores::initialize",
   "config_prefix": "wg",
   "config": {
     "ArticleScoresConfig": {
@@ -36,8 +37,8 @@
     "articlescores": "MediaWiki\\Extension\\ArticleScores\\Api\\ApiArticleScores"
   },
   "Hooks": {
-    "ArticleScoresRegisterMetrics": "main",
     "HtmlPageLinkRendererEnd": "main",
+    "JsonClassRegistration": "main",
     "LoadExtensionSchemaUpdates": "main",
     "ParserFirstCallInit": "main",
     "SidebarBeforeOutput": "main",
@@ -78,6 +79,5 @@
   "SpecialPages": {
     "ArticleScores": "MediaWiki\\Extension\\ArticleScores\\Special\\SpecialArticleScores"
   },
-  "ServiceWiringFiles": [ "src/ServiceWiring.php" ],
   "manifest_version": 2
 }

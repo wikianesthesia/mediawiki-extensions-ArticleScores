@@ -2,7 +2,7 @@
 
 namespace MediaWiki\Extension\ArticleScores;
 
-use MediaWiki\Extension\JsonSchemaClasses\AbstractSchema;
+use MediaWiki\Extension\JsonClasses\AbstractSchema;
 use MediaWiki\MediaWikiServices;
 
 class MetricSchema extends AbstractSchema {
@@ -24,10 +24,5 @@ class MetricSchema extends AbstractSchema {
 
     public function getSchemaName(): string {
         return 'Metric';
-    }
-
-    public function registerClasses( &$classRegistry ) {
-        MediaWikiServices::getInstance()->get( 'ArticleScoresHookRunner' )
-            ->onArticleScoresRegisterMetrics( $classRegistry );
     }
 }

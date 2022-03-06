@@ -5,27 +5,26 @@ namespace MediaWiki\Extension\ArticleScores\Hook;
 use HtmlArmor;
 use Html;
 use MediaWiki\Extension\ArticleScores\ArticleScores;
-use MediaWiki\Extension\JsonSchemaClasses\ClassRegistry;
-use MediaWiki\Installer\Hook\LoadExtensionSchemaUpdatesHook;
+use MediaWiki\Extension\ArticleScores\MetricSchema;
+use MediaWiki\Extension\JsonClasses\Hook\JsonClassRegistrationHook;
 use MediaWiki\Hook\ParserFirstCallInitHook;
 use MediaWiki\Hook\SidebarBeforeOutputHook;
 use MediaWiki\Hook\SkinTemplateNavigation__UniversalHook;
+use MediaWiki\Installer\Hook\LoadExtensionSchemaUpdatesHook;
 use MediaWiki\Linker\Hook\HtmlPageLinkRendererEndHook;
 use RequestContext;
 use Title;
 
 class HookHandler implements
-    ArticleScoresRegisterMetricsHook,
     HtmlPageLinkRendererEndHook,
+    JsonClassRegistrationHook,
     LoadExtensionSchemaUpdatesHook,
     ParserFirstCallInitHook,
     SidebarBeforeOutputHook,
-    SkinTemplateNavigation__UniversalHook{
-
-    public function onArticleScoresRegisterMetrics( ClassRegistry $metricRegistry ) {
-        $metricRegistry->register( ArticleScores::getMetricsLocalDirectory(), true );
-    }
-
+    SkinTemplateNavigation__UniversalHook {
+    /**
+     * @inheritDoc
+     */
     public function onHtmlPageLinkRendererEnd( $linkRenderer, $target, $isKnown, &$text, &$attribs, &$ret ) {
         if( !ArticleScores::getUseLinkFlair() || !$isKnown ) {
             return;
@@ -49,6 +48,17 @@ class HookHandler implements
         return true;
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function onJsonClassRegistration( $classManager ) {
+        $classManager->registerSchema( MetricSchema::class );
+        $classManager->loadClassDirectory( MetricSchema::class, ArticleScores::getMetricsLocalDirectory(), true );
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function onLoadExtensionSchemaUpdates( $updater ) {
         # Make sure these are in the order you want them added to the database. The keys are the table names and the
         # values are any field in the table (used to see if the table is empty to insert the default data).
@@ -88,11 +98,17 @@ class HookHandler implements
         }
     }
 
+    /**
+     * @inheritDoc
+     */
     public function onParserFirstCallInit( $parser ) {
         $parser->setHook( 'articlescores', 'MediaWiki\\Extension\\ArticleScores\\Parser\\ArticleScores::render' );
         $parser->setHook( 'articlescoreslinkflair', 'MediaWiki\\Extension\\ArticleScores\\Parser\\ArticleScoresLinkFlair::render' );
     }
 
+    /**
+     * @inheritDoc
+     */
     public function onSidebarBeforeOutput( $skin, &$sidebar ): void {
         global $wgArticleScoresTopArticlesDefaultMetric;
 
@@ -108,6 +124,9 @@ class HookHandler implements
         ];
     }
 
+    /**
+     * @inheritDoc
+     */
     public function onSkinTemplateNavigation__Universal( $sktemplate, &$links ): void {
         $title = $sktemplate->getRelevantTitle();
 

@@ -4,14 +4,14 @@ namespace MediaWiki\Extension\ArticleScores;
 
 use Database;
 use ManualLogEntry;
-use MediaWiki\Extension\JsonSchemaClasses\AbstractJsonSchemaClass;
+use MediaWiki\Extension\JsonClasses\AbstractJsonClass;
 use MediaWiki\MediaWikiServices;
 use MWTimestamp;
 use RequestContext;
 use Status;
 use Title;
 
-abstract class AbstractMetric extends AbstractJsonSchemaClass {
+abstract class AbstractMetric extends AbstractJsonClass {
     /**
      * @var Submetric[]
      */

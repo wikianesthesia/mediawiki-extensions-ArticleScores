@@ -2,7 +2,7 @@
 
 namespace MediaWiki\Extension\ArticleScores;
 
-use MediaWiki\Extension\JsonSchemaClasses\JsonSchemaClassManager;
+use MediaWiki\Extension\JsonClasses\JsonClassManager;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
 use Psr\Log\LoggerInterface;
@@ -14,11 +14,6 @@ class ArticleScores {
     public const CACHE_TTL = WANObjectCache::TTL_DAY;
     public const DEFAULT_SUBMETRIC = 'main';
     protected const SCHEMA_CLASS = MetricSchema::class;
-
-    /**
-     * @var JsonSchemaClassManager
-     */
-    protected static $classManager;
 
     /**
      * @var string
@@ -144,7 +139,8 @@ class ArticleScores {
      * @return AbstractMetric|null
      */
     public static function getMetric( string $metricId ): ?AbstractMetric {
-        return static::$classManager->getClassInstanceForSchema( static::SCHEMA_CLASS, $metricId );
+        return MediaWikiServices::getInstance()->get( 'JsonClassManager' )
+            ->getClassInstanceForSchema( static::SCHEMA_CLASS, $metricId );
     }
 
 
@@ -153,7 +149,8 @@ class ArticleScores {
      * @return AbstractMetric[]
      */
     public static function getMetrics(): array {
-        return static::$classManager->getClassInstancesForSchema( static::SCHEMA_CLASS );
+        return MediaWikiServices::getInstance()->get( 'JsonClassManager' )
+            ->getClassInstancesForSchema( static::SCHEMA_CLASS );
     }
 
 
@@ -178,6 +175,10 @@ class ArticleScores {
     }
 
 
+
+    /**
+     * @return bool
+     */
     public static function getUseLinkFlair(): bool {
         return static::$useLinkFlair;
     }
@@ -185,15 +186,9 @@ class ArticleScores {
 
 
     /**
-     *
+     * @param bool $useLinkFlair
      */
-    public static function initialize() {
-        static::$classManager = MediaWikiServices::getInstance()->get( 'JsonSchemaClassManager' );
-        static::$classManager->registerSchema(MetricSchema::class );
-    }
-
-
-    public static function setUseLinkFlair( bool $useLinkFlair = false ) {
+    public static function setUseLinkFlair( bool $useLinkFlair = false ): void {
         static::$useLinkFlair = $useLinkFlair;
     }
 }
