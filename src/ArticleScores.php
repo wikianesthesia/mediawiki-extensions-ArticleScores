@@ -2,7 +2,6 @@
 
 namespace MediaWiki\Extension\ArticleScores;
 
-use MediaWiki\Extension\JsonClasses\JsonClassManager;
 use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
 use Psr\Log\LoggerInterface;
