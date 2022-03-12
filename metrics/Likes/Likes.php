@@ -6,14 +6,17 @@ use Elastica\Request;
 use Html;
 use MediaWiki\Extension\ArticleScores\AbstractMetric;
 use MediaWiki\Extension\ArticleScores\ArticleScores;
+use Parser;
 use RequestContext;
 use Title;
 
 class Likes extends AbstractMetric {
+    public function addResourceLoaderModules( Parser $parser ): void {
+        $parser->getOutput()->addModules( 'ext.articleScores.likes' );
+    }
+
     public function getArticleScoreHtml( Title $title, bool $includeLabel = true, bool $includeInput = true ): string {
         $html = '';
-
-        RequestContext::getMain()->getOutput()->addModules( 'ext.articleScores.likes' );
 
         $enableDislikes = $this->getConfig( 'EnableDislikes' );
 

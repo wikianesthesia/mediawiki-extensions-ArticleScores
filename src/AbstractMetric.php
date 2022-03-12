@@ -7,6 +7,7 @@ use ManualLogEntry;
 use MediaWiki\Extension\JsonClasses\AbstractJsonClass;
 use MediaWiki\MediaWikiServices;
 use MWTimestamp;
+use Parser;
 use RequestContext;
 use Status;
 use Title;
@@ -19,6 +20,8 @@ abstract class AbstractMetric extends AbstractJsonClass {
 
     protected $titleScoreValues = [];
     protected $userScoreValues = [];
+
+    public function addResourceLoaderModules( Parser $parser ): void {}
 
     /**
      * @param Title $title
@@ -158,10 +161,6 @@ abstract class AbstractMetric extends AbstractJsonClass {
         return $articleScoreValues;
     }
 
-    public function getLinkFlairHtml( Title $title ): string {
-        return '';
-    }
-
     /**
      * @return string
      */
@@ -187,6 +186,13 @@ abstract class AbstractMetric extends AbstractJsonClass {
     public function getTopTitles( string $submetricId, int $limit, int $fromArticleId = 0 ): array {
         // Might need to add an `archived` column to scores table to keep query efficient?
         return [];
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasLinkFlair(): bool {
+        return false;
     }
 
     /**
@@ -449,6 +455,9 @@ abstract class AbstractMetric extends AbstractJsonClass {
     protected function purgeTitle( Title $title ) {
         $cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
         $cache->delete( $this->getCacheKey( $title ) );
+
+        $page = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $title );
+        $page->doPurge();
 
         unset( $this->titleScoreValues[ $title->getArticleID() ] );
         unset( $this->userScoreValues[ $title->getArticleID() ] );

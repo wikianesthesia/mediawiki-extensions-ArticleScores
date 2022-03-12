@@ -5,6 +5,7 @@ namespace MediaWiki\Extension\ArticleScores\Api;
 use ApiBase;
 use MediaWiki\Extension\ArticleScores\ArticleScores;
 use Wikimedia\ParamValidator\ParamValidator;
+use Title;
 
 class ApiArticleScoresGetScores extends ApiArticleScoresBaseGet {
     public function __construct( $api, $modName ) {
@@ -24,11 +25,33 @@ class ApiArticleScoresGetScores extends ApiArticleScoresBaseGet {
 
         $params = $this->extractRequestParams();
 
-        $output[ $asaction ][ 'result' ] = ArticleScores::getArticleScoresForPageId(
-            $params[ 'pageid' ],
-            $params[ 'userscores' ],
-            $params[ 'defaults' ],
-        );
+        if( $params[ 'pageids' ] ) {
+            $pageIds = explode( ',', $params[ 'pageids' ] );
+
+            foreach( $pageIds as $pageId ) {
+                $title = Title::newFromID( $pageId );
+
+                $output[ $asaction ][ 'result' ][ $pageId ] = ArticleScores::getArticleScoresForTitle(
+                    $title,
+                    $params[ 'userscores' ],
+                    $params[ 'defaults' ],
+                );
+            }
+        }
+
+        if( $params[ 'titles' ] ) {
+            $titleTexts = explode( ',', $params[ 'titles' ] );
+
+            foreach( $titleTexts as $titleText ) {
+                $title = Title::newFromText( $titleText );
+
+                $output[ $asaction ][ 'result' ][ $titleText ] = ArticleScores::getArticleScoresForTitle(
+                    $title,
+                    $params[ 'userscores' ],
+                    $params[ 'defaults' ],
+                );
+            }
+        }
 
         $this->getResult()->addValue( null, $this->apiArticleScores->getModuleName(), $output );
     }
@@ -42,8 +65,12 @@ class ApiArticleScoresGetScores extends ApiArticleScoresBaseGet {
 
     public function getAllowedParams() {
         return [
-            'pageid' => [
-                ApiBase::PARAM_REQUIRED => true,
+            'pageids' => [
+                ApiBase::PARAM_REQUIRED => false,
+                ApiBase::PARAM_TYPE => 'string'
+            ],
+            'titles' => [
+                ApiBase::PARAM_REQUIRED => false,
                 ApiBase::PARAM_TYPE => 'string'
             ],
             'userscores' => [

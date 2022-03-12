@@ -41,6 +41,7 @@ class ArticleScores {
 
         if( !$title ||
             !$title->exists() ||
+            $title->isRedirect() ||
             !in_array( $title->getNamespace(), $wgArticleScoresEnabledNamespaces )) {
             return false;
         }
@@ -49,15 +50,13 @@ class ArticleScores {
     }
 
     /**
-     * @param int $pageId
+     * @param Title $title
      * @param bool $includeUserscores
      * @param bool $includeDefaultValues
      * @return array
      */
-    public static function getArticleScoresForPageId( int $pageId, bool $includeUserscores = false, bool $includeDefaultValues = false ): array {
+    public static function getArticleScoresForTitle( Title $title, bool $includeUserscores = false, bool $includeDefaultValues = false ): array {
         $articleScores = [];
-
-        $title = Title::newFromID( $pageId );
 
         if( !static::canTitleHaveArticleScore( $title ) ) {
             return $articleScores;
@@ -100,23 +99,6 @@ class ArticleScores {
      */
     public static function getExtensionName(): string {
         return 'ArticleScores';
-    }
-
-
-    public static function getLinkFlairForPageId( int $pageId ): string {
-        $linkFlair = '';
-
-        $title = Title::newFromID( $pageId );
-
-        if( !static::canTitleHaveArticleScore( $title ) ) {
-            return $linkFlair;
-        }
-
-        foreach( static::getMetrics() as $metric ) {
-            $linkFlair .= $metric->getLinkFlairHtml( $title );
-        }
-
-        return $linkFlair;
     }
 
 

@@ -30,6 +30,9 @@
   "config": {
     "IconColor": "black"
   },
+  "AutoloadClasses": {
+    "MediaWiki\\Extension\\ArticleScores\\Metric\\EditorRating\\Hooks": "src/Hooks.php"
+  },
   "AvailableRights": [
     "articlescores-editorrating"
   ],
@@ -37,6 +40,9 @@
     "sysop": {
       "articlescores-editorrating": true
     }
+  },
+  "Hooks": {
+    "BeforePageDisplay": "MediaWiki\\Extension\\ArticleScores\\Metric\\EditorRating\\Hooks::onBeforePageDisplay"
   },
   "MessagesDirs": [
     "i18n"

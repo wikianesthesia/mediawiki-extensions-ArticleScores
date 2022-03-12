@@ -10,15 +10,15 @@ use PPFrame;
 
 class ArticleScores {
     public static function render( $input, array $args, Parser $parser, PPFrame $frame ) {
-        $parser->getOutput()->updateCacheExpiry( 0 );
-
         $output = '';
 
         $title = $parser->getTitle();
 
-        if( !$title || !$title->exists() ) {
+        if( !ArticleScoresManager::canTitleHaveArticleScore( $title ) ) {
             return $output;
         }
+
+        $parser->getOutput()->addModules( 'ext.articleScores.common' );
 
         if( !isset( $args[ 'metric' ] ) ) {
             $metrics = ArticleScoresManager::getMetrics();
@@ -29,9 +29,15 @@ class ArticleScores {
         }
 
         foreach( $metrics as $metric ) {
-            $output .= Html::rawElement( 'div', [
-                'class' => $metric->getMsgKeyPrefix()
-            ], $metric->getArticleScoreHtml( $title, $includeLabel ) );
+            $metricHtml = $metric->getArticleScoreHtml( $title, $includeLabel );
+
+            if( $metricHtml ) {
+                $metric->addResourceLoaderModules( $parser );
+
+                $output .= Html::rawElement( 'div', [
+                    'class' => $metric->getMsgKeyPrefix()
+                ], $metricHtml );
+            }
         }
 
         return [

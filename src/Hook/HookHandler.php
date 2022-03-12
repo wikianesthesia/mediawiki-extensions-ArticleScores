@@ -7,15 +7,16 @@ use Html;
 use MediaWiki\Extension\ArticleScores\ArticleScores;
 use MediaWiki\Extension\ArticleScores\MetricSchema;
 use MediaWiki\Extension\JsonClasses\Hook\JsonClassRegistrationHook;
+use MediaWiki\Hook\BeforeInitializeHook;
 use MediaWiki\Hook\ParserFirstCallInitHook;
 use MediaWiki\Hook\SidebarBeforeOutputHook;
 use MediaWiki\Hook\SkinTemplateNavigation__UniversalHook;
 use MediaWiki\Installer\Hook\LoadExtensionSchemaUpdatesHook;
 use MediaWiki\Linker\Hook\HtmlPageLinkRendererEndHook;
-use RequestContext;
 use Title;
 
 class HookHandler implements
+    BeforeInitializeHook,
     HtmlPageLinkRendererEndHook,
     JsonClassRegistrationHook,
     LoadExtensionSchemaUpdatesHook,
@@ -25,23 +26,34 @@ class HookHandler implements
     /**
      * @inheritDoc
      */
+    public function onBeforeInitialize( $title, $unused, $output, $user, $request, $mediaWiki ) {
+        global $wgArticleScoresLinkFlairTitles;
+
+        if( in_array( $title->getFullText(), $wgArticleScoresLinkFlairTitles ) ) {
+            ArticleScores::setUseLinkFlair( true );
+        }
+    }
+
+    /**
+     * @inheritDoc
+     */
     public function onHtmlPageLinkRendererEnd( $linkRenderer, $target, $isKnown, &$text, &$attribs, &$ret ) {
         if( !ArticleScores::getUseLinkFlair() || !$isKnown ) {
             return;
         }
 
-        RequestContext::getMain()->getOutput()->addModules( 'ext.articleScores.common' );
-
         $title = Title::newFromLinkTarget( $target );
 
-        if( $title->isRedirect() ) {
+        if( !ArticleScores::canTitleHaveArticleScore( $title ) ) {
             return;
         }
 
         $text = new HtmlArmor(
             HtmlArmor::getHtml( $text ) .
-            Html::rawElement( 'span', [ 'class' => 'articlescores-linkflair' ],
-                ArticleScores::getLinkFlairForPageId( $title->getArticleID() )
+            Html::rawElement( 'span', [
+                    'class' => 'articlescores-linkflair',
+                    'data-pageid' => $title->getArticleID()
+                ]
             )
         );
 

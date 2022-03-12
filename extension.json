@@ -23,6 +23,9 @@
     "ArticleScoresEnabledNamespaces": {
       "value": [ 0 ]
     },
+    "ArticleScoresLinkFlairTitles": {
+      "value": [ "Special:Search" ]
+    },
     "ArticleScoresTopArticlesDefaultMetric": {
       "value": ""
     }
@@ -37,6 +40,7 @@
     "articlescores": "MediaWiki\\Extension\\ArticleScores\\Api\\ApiArticleScores"
   },
   "Hooks": {
+    "BeforeInitialize": "main",
     "HtmlPageLinkRendererEnd": "main",
     "JsonClassRegistration": "main",
     "LoadExtensionSchemaUpdates": "main",

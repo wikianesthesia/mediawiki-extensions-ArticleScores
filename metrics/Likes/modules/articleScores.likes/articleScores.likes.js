@@ -81,15 +81,19 @@
             }
         },
         updateValues: function() {
-            var callback = function( response ) {
-                for( var submetricId in response.result.Likes ) {
-                    $( '.articlescores-likes-value-' + submetricId ).val( response.result.Likes[ submetricId ].value );
-                }
+            var pageId = mw.config.get( 'wgArticleId' );
 
-                mw.articleScores.likes.renderValue();
+            var callback = function( response ) {
+                if( response.status === 'ok' ) {
+                    for( var submetricId in response.result[ pageId ].Likes ) {
+                        $( '.articlescores-likes-value-' + submetricId ).val( response.result[ pageId ].Likes[ submetricId ].value );
+                    }
+
+                    mw.articleScores.likes.renderValue();
+                }
             };
 
-            mw.articleScores.common.getScores( callback );
+            mw.articleScores.common.getScoresForPageIds( pageId, callback );
         }
     };
 
