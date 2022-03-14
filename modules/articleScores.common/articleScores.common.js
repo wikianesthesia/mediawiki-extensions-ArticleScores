@@ -28,7 +28,7 @@
             }
 
             mw.articleScores.common.getScores( {
-                pageids: pageIds.join()
+                pageids: pageIds.join( '|' )
             }, callback );
         },
         getScoresForTitles: function( titles, callback ) {
@@ -37,7 +37,7 @@
             }
 
             mw.articleScores.common.getScores( {
-                titles: titles.join()
+                titles: titles.join( '|' )
             }, callback );
         },
         getLinkFlairScores: function() {

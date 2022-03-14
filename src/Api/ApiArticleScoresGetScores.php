@@ -26,7 +26,7 @@ class ApiArticleScoresGetScores extends ApiArticleScoresBaseGet {
         $params = $this->extractRequestParams();
 
         if( $params[ 'pageids' ] ) {
-            $pageIds = explode( ',', $params[ 'pageids' ] );
+            $pageIds = explode( '|', $params[ 'pageids' ] );
 
             foreach( $pageIds as $pageId ) {
                 $title = Title::newFromID( $pageId );
@@ -40,7 +40,7 @@ class ApiArticleScoresGetScores extends ApiArticleScoresBaseGet {
         }
 
         if( $params[ 'titles' ] ) {
-            $titleTexts = explode( ',', $params[ 'titles' ] );
+            $titleTexts = explode( '|', $params[ 'titles' ] );
 
             foreach( $titleTexts as $titleText ) {
                 $title = Title::newFromText( $titleText );
