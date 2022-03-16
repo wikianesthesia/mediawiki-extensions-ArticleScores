@@ -5,7 +5,6 @@ namespace MediaWiki\Extension\ArticleScores\Metric;
 use Html;
 use MediaWiki\Extension\ArticleScores\AbstractMetric;
 use Parser;
-use RequestContext;
 use Title;
 
 class EditorRating extends AbstractMetric {
@@ -35,36 +34,15 @@ class EditorRating extends AbstractMetric {
             }
 
             $html .= Html::rawElement( 'span', [
-                'class' => $this->getMsgKeyPrefix() . '-value'
+                'class' => $this->getMsgKeyPrefix() . '-value',
+                'data-value' => $articleScoreValues[ 'main' ]->value,
+                'title' => $articleScoreValues[ 'main' ]->description
             ], $editorRatingValue );
 
-            if( $includeInput && $this->userCanSetArticleScore( $title ) ) {
-                $html .= Html::openElement( 'div', [
-                    'class' => $this->getMsgKeyPrefix() . '-input'
+            if( $includeInput ) {
+                $html .= Html::rawElement( 'div', [
+                    'class' => 'articlescores-input ' . $this->getMsgKeyPrefix() . '-input'
                 ] );
-
-                $submetricValueOptions = $this->getSubmetric( 'main' )->getValueDefinition()->getOptions();
-
-                $html .= wfMessage( $this->getMsgKeyPrefix() . '-changerating' )->text() . ': ';
-
-                $html .= Html::openElement( 'select', [
-                    'class' => $this->getMsgKeyPrefix() . '-input-select'
-                ] );
-
-                foreach( $submetricValueOptions as $submetricValueOption ) {
-                    $optionAttribs = [
-                        'value' => $submetricValueOption->getValue()
-                    ];
-
-                    if( $articleScoreValues[ 'main' ]->value == $submetricValueOption->getValue() ) {
-                        $optionAttribs[ 'selected' ] = 'true';
-                    }
-
-                    $html .= Html::rawElement( 'option', $optionAttribs, $submetricValueOption->getName() );
-                }
-
-                $html .= Html::closeElement( 'select' );
-                $html .= Html::closeElement( 'div' );
             }
         }
 

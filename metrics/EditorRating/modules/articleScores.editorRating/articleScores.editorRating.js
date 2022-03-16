@@ -5,13 +5,41 @@
 
     mw.articleScores.editorRating = {
         initialize: function() {
-            mw.hook( 'articleScores.getLinkFlairScores' ).add( mw.articleScores.editorRating.renderLinkFlair );
+            mw.hook( 'articleScores.loadLinkFlairScores' ).add( mw.articleScores.editorRating.renderLinkFlair );
+            mw.hook( 'articleScores.loadScoreInfo' ).add( mw.articleScores.editorRating.renderInputs );
             mw.trackSubscribe( 'mediawiki.searchSuggest', mw.articleScores.editorRating.renderSearchSuggest );
             mw.trackSubscribe( 'mw.widgets.SearchInputWidget', mw.articleScores.editorRating.renderSearchInputWidget );
+        },
+        generateIcon: function( properties ) {
+            var iconAttribs = {
+                'class': properties.icon,
+                'title': properties.description
+            };
 
-            var selectClass = 'articlescores-editorrating-input-select';
+            if( properties.iconColor ) {
+                iconAttribs.style = 'color: ' + properties.iconColor;
+            }
 
-            $( '.' + selectClass ).change( function() {
+            return $( '<i>', iconAttribs );
+        },
+        renderInputs: function() {
+            var $inputElement = $( '.articlescores-editorrating-input' );
+
+            if( !$inputElement.length ||
+                !mw.articleScores.common.scoreInfo.hasOwnProperty( 'EditorRating' ) ||
+                !mw.articleScores.common.scoreInfo.EditorRating.hasOwnProperty( 'main' ) ||
+                !mw.articleScores.common.scoreInfo.EditorRating.main.hasOwnProperty( 'userCanSet' ) ||
+                !mw.articleScores.common.scoreInfo.EditorRating.main.userCanSet ) {
+                return;
+            }
+
+            var options = mw.articleScores.common.scoreInfo.EditorRating.main.options;
+
+            var label = mw.msg( 'articlescores-editorrating-changerating' ) + ': ';
+
+            var $select = $( '<select>', {
+                'class': 'articlescores-editorrating-input-select'
+            } ).change( function() {
                 var newValue = $( this ).val();
 
                 var callback = function( response ) {
@@ -27,24 +55,26 @@
                     callback
                 );
             } );
-        },
-        generateIcon: function( properties ) {
-            var iconAttribs = {
-                'class': properties.icon,
-                'title': properties.description
-            };
 
-            if( properties.iconColor ) {
-                iconAttribs.style = 'color: ' + properties.iconColor;
+            for( var iOption in options ) {
+                $select.append( $( '<option>', {
+                    'value': options[ iOption ].value,
+                    'selected': mw.articleScores.common.scoreInfo.EditorRating.main.value == options[ iOption ].value,
+                    'title': options[ iOption ].description
+                } ).append( options[ iOption ].name ) );
             }
 
-            return $( '<i>', iconAttribs );
+            $inputElement.empty();
+
+            $inputElement.append(
+                label, $select
+            );
         },
-        renderLinkFlair: function( linkFlairScores ) {
-            for( var pageId in linkFlairScores ) {
-                if( linkFlairScores[ pageId ].hasOwnProperty( 'EditorRating' ) ) {
+        renderLinkFlair: function() {
+            for( var pageId in mw.articleScores.common.linkFlairScores ) {
+                if( mw.articleScores.common.linkFlairScores[ pageId ].hasOwnProperty( 'EditorRating' ) ) {
                     $( '.articlescores-linkflair[data-pageid="' + pageId + '"]' ).append(
-                        mw.articleScores.editorRating.generateIcon( linkFlairScores[ pageId ].EditorRating.main )
+                        mw.articleScores.editorRating.generateIcon( mw.articleScores.common.linkFlairScores[ pageId ].EditorRating.main )
                     );
                 }
             }
@@ -109,6 +139,10 @@
             var $valueElement = $( '.articlescores-editorrating-value' );
 
             $valueElement.empty();
+
+            $valueElement.attr( 'data-value', value.value );
+            $valueElement.attr( 'title', value.description );
+
             if( value.icon ) {
                 $valueElement.append( $( '<i>', {
                     'class': value.icon + ' ' + 'articlescores-editorrating-icon',

@@ -11,6 +11,7 @@ use Parser;
 use RequestContext;
 use Status;
 use Title;
+use User;
 
 abstract class AbstractMetric extends AbstractJsonClass {
     /**
@@ -286,18 +287,18 @@ abstract class AbstractMetric extends AbstractJsonClass {
     }
 
     /**
+     * @param User $user
      * @param Title $title
      * @param string $submetricId
      * @return bool
      */
-    public function userCanSetArticleScore( Title $title, string $submetricId = ArticleScores::DEFAULT_SUBMETRIC ): bool {
+    public function userCanSetArticleScore( User $user, Title $title, string $submetricId = ArticleScores::DEFAULT_SUBMETRIC ): bool {
         $submetric = $this->getSubmetric( $submetricId );
 
         if( !$submetric || $submetric->getValueDefinition()->isDerived() ) {
             return false;
         }
 
-        $user = RequestContext::getMain()->getUser();
         $permissionManager = MediaWikiServices::getInstance()->getPermissionManager();
 
         // Prevent setting score for pages the user cannot read
@@ -350,7 +351,7 @@ abstract class AbstractMetric extends AbstractJsonClass {
             );
 
             return $result;
-        } elseif( !$this->userCanSetArticleScore( $title, $submetricId ) && !$valueDefinition->isDerived() ) {
+        } elseif( !$this->userCanSetArticleScore( $user, $title, $submetricId ) && !$valueDefinition->isDerived() ) {
             $result->fatal(
                 ArticleScores::getExtensionName() . '-permissiondenied'
             );

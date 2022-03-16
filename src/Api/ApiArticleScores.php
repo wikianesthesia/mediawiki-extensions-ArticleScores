@@ -17,7 +17,8 @@ class ApiArticleScores extends ApiBase {
     private $moduleManager;
     private static $asActions = [
         'getscores' => ApiArticleScoresGetScores::class,
-        'setscore' => ApiArticleScoresSetScore::class
+        'setscore' => ApiArticleScoresSetScore::class,
+        'getscoreinfo' => ApiArticleScoresGetScoreInfo::class
     ];
 
     /*

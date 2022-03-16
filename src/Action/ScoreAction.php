@@ -16,14 +16,16 @@ class ScoreAction extends Action {
 
         $title = $this->getTitle();
 
-        if( !ArticleScores::canTitleHaveArticleScore( $title ) ) {
-            return;
-        }
-
         $out = $this->getOutput();
 
         $out->setPageTitle( wfMessage( 'articlescores-action-title', $title->getText() )->text() );
         $out->addBacklinkSubtitle( $title );
+
+        if( !ArticleScores::canTitleHaveArticleScore( $title ) ) {
+            $out->addHTML( wfMessage( 'articlescores-action-notallowed', $title->getFullText() ) );
+
+            return;
+        }
 
         $out->addHTML( $out->parseAsContent( '<articlescores />' ) );
     }

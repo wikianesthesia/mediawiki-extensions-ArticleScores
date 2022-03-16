@@ -59,6 +59,7 @@
         "ext.articleScores.common"
       ],
       "messages": [
+        "articlescores-editorrating-changerating",
         "articlescores-editorrating-unrated"
       ]
     }

@@ -27,63 +27,31 @@ class Likes extends AbstractMetric {
         }
 
         $html .= Html::openElement( 'span', [
-            'class' => $this->getMsgKeyPrefix() . '-value-main'
+            'class' => $this->getMsgKeyPrefix() . '-value'
         ] );
 
-        $html .= $articleScoreValues[ 'likes' ]->value;
+        $html .= Html::rawElement( 'span', [
+            'class' => $this->getMsgKeyPrefix() . '-likes-value',
+            'data-value' => $articleScoreValues[ 'likes' ]->value
+        ], $articleScoreValues[ 'likes' ]->value );
 
         if( $enableDislikes ) {
-            $html .= ' (' . $articleScoreValues[ 'percentLikes' ]->value . '%)';
+            $html .= ' (' .
+                Html::rawElement( 'span', [
+                    'class' => $this->getMsgKeyPrefix() . '-percentLikes-value',
+                    'data-value' => $articleScoreValues[ 'percentLikes' ]->value
+                ], $articleScoreValues[ 'percentLikes' ]->value )
+                . '%)';
         }
 
         $html .= Html::closeElement( 'span' );
 
-        if( $includeInput && $this->userCanSetArticleScore( $title, 'user' ) ) {
-            $html .= Html::openElement( 'span', [
-                'class' => $this->getMsgKeyPrefix() . '-buttons'
+        if( $includeInput ) {
+            $tag = $enableDislikes ? 'div' : 'span';
+
+            $html .= Html::rawElement( $tag, [
+                'class' => 'articlescores-input ' . $this->getMsgKeyPrefix() . '-input'
             ] );
-
-            $html .= Html::rawElement( 'input', [
-                'type' => 'hidden',
-                'class' => $this->getMsgKeyPrefix() . '-value-likes',
-                'value' => $articleScoreValues[ 'likes' ]->value
-            ] );
-
-            if( $enableDislikes ) {
-                $html .= Html::rawElement( 'input', [
-                    'type' => 'hidden',
-                    'class' => $this->getMsgKeyPrefix() . '-value-percentLikes',
-                    'value' => $articleScoreValues[ 'percentLikes' ]->value
-                ] );
-
-                $html .= Html::rawElement( 'input', [
-                    'type' => 'hidden',
-                    'class' => $this->getMsgKeyPrefix() . '-value-dislikes',
-                    'value' => $articleScoreValues[ 'dislikes' ]->value
-                ] );
-            }
-
-            $html .= Html::rawElement( 'input', [
-                'type' => 'hidden',
-                'class' => $this->getMsgKeyPrefix() . '-value-user',
-                'value' => $articleScoreValues[ 'user' ]->value
-            ] );
-
-            $html .= Html::rawElement(
-                'a',
-                [
-                    'class' => $this->getMsgKeyPrefix() . '-button-like'
-                ] );
-
-            if( $enableDislikes ) {
-                $html .= Html::rawElement(
-                    'a',
-                    [
-                        'class' => $this->getMsgKeyPrefix() . '-button-dislike'
-                    ] );
-            }
-
-            $html .= Html::closeElement( 'div' );
         }
 
         return $html;
@@ -121,7 +89,7 @@ class Likes extends AbstractMetric {
 
                 $conds[ 'value' ] = $submetricId === 'likes' ? 1 : -1;
             } elseif( $submetricId === 'percentLikes' ) {
-                $vars = 'ROUND(100 * SUM(CASE WHEN value=1 THEN 1 ELSE 0 END) / COUNT(score_id), 1) as value';
+                $vars = 'ROUND(100 * SUM(CASE WHEN value=1 THEN 1 ELSE 0 END) / COUNT(value), 1) as value';
             }
 
             $res = $db->select(

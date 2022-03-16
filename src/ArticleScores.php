@@ -6,6 +6,7 @@ use MediaWiki\Logger\LoggerFactory;
 use MediaWiki\MediaWikiServices;
 use Psr\Log\LoggerInterface;
 use Title;
+use User;
 use Wikimedia\Rdbms\DBConnRef;
 use WANObjectCache;
 
@@ -55,7 +56,7 @@ class ArticleScores {
      * @param bool $includeDefaultValues
      * @return array
      */
-    public static function getArticleScoresForTitle( Title $title, bool $includeUserscores = false, bool $includeDefaultValues = false ): array {
+    public static function getArticleScoresForTitle( Title $title, bool $includeUserscores = true, bool $includeDefaultValues = true ): array {
         $articleScores = [];
 
         if( !static::canTitleHaveArticleScore( $title ) ) {
@@ -171,5 +172,25 @@ class ArticleScores {
      */
     public static function setUseLinkFlair( bool $useLinkFlair = false ): void {
         static::$useLinkFlair = $useLinkFlair;
+    }
+
+
+
+    /**
+     * @param User $user
+     * @param Title $title
+     */
+    public static function userCanSetAnyArticleScore( User $user, Title $title ): bool {
+        $metrics = static::getMetrics();
+
+        foreach( $metrics as $metric ) {
+            foreach( $metric->getSubmetrics() as $submetric ) {
+                if( $metric->userCanSetArticleScore( $user, $title, $submetric->getId() ) ) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

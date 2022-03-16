@@ -38,7 +38,7 @@ class HookHandler implements
      * @inheritDoc
      */
     public function onHtmlPageLinkRendererEnd( $linkRenderer, $target, $isKnown, &$text, &$attribs, &$ret ) {
-        if( !ArticleScores::getUseLinkFlair() || !$isKnown ) {
+        if( !ArticleScores::getUseLinkFlair() || !$isKnown || $target->hasFragment() ) {
             return;
         }
 
@@ -56,8 +56,6 @@ class HookHandler implements
                 ]
             )
         );
-
-        return true;
     }
 
     /**
@@ -142,7 +140,8 @@ class HookHandler implements
     public function onSkinTemplateNavigation__Universal( $sktemplate, &$links ): void {
         $title = $sktemplate->getRelevantTitle();
 
-        if( ArticleScores::canTitleHaveArticleScore( $title ) ) {
+        if( ArticleScores::canTitleHaveArticleScore( $title ) &&
+            ArticleScores::userCanSetAnyArticleScore( $sktemplate->getUser(), $title )) {
             $request = $sktemplate->getRequest();
 
             $links[ 'actions' ][ 'score' ] = [
