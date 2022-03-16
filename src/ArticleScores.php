@@ -105,6 +105,28 @@ class ArticleScores {
 
 
     /**
+     * @param int $pageId
+     * @return string
+     */
+    public static function getLinkFlairForPageId( int $pageId ): string {
+        $linkFlair = '';
+
+        $title = Title::newFromID( $pageId );
+
+        if( !static::canTitleHaveArticleScore( $title ) ) {
+            return $linkFlair;
+        }
+
+        foreach( static::getMetrics() as $metric ) {
+            $linkFlair .= $metric->getLinkFlairHtml( $title );
+        }
+
+        return $linkFlair;
+    }
+
+
+
+    /**
      * @return LoggerInterface
      */
     public static function getLogger(): LoggerInterface {

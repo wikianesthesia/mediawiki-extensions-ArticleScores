@@ -163,6 +163,14 @@ abstract class AbstractMetric extends AbstractJsonClass {
     }
 
     /**
+     * @param Title $title
+     * @return string
+     */
+    public function getLinkFlairHtml( Title $title ): string {
+        return '';
+    }
+
+    /**
      * @return string
      */
     public function getMsgKeyPrefix(): string {
@@ -457,8 +465,23 @@ abstract class AbstractMetric extends AbstractJsonClass {
         $cache = MediaWikiServices::getInstance()->getMainWANObjectCache();
         $cache->delete( $this->getCacheKey( $title ) );
 
-        $page = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $title );
-        $page->doPurge();
+        // Purge this title
+        $purgeTitles = [ $title ];
+
+        // Purge any titles that link to this title (in case they use link flair)
+        foreach( $title->getLinksTo() as $linkingTitle ) {
+            if( $linkingTitle ) {
+                $purgeTitles[] = $linkingTitle;
+            }
+        }
+
+        $logger = ArticleScores::getLogger();
+        foreach( $purgeTitles as $purgeTitle ) {
+            $logger->debug( $purgeTitle->getFullText() );
+            if( $purgeTitle->exists() ) {
+                MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $purgeTitle )->doPurge();
+            }
+        }
 
         unset( $this->titleScoreValues[ $title->getArticleID() ] );
         unset( $this->userScoreValues[ $title->getArticleID() ] );

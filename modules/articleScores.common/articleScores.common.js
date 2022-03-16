@@ -6,7 +6,6 @@
     mw.articleScores = mw.articleScores || {};
 
     mw.articleScores.common = {
-        linkFlairScores: {},
         scoreInfo: {},
         getScores: function( apiParams, callback ) {
             var asaction = 'getscores';
@@ -42,24 +41,6 @@
                 'titles': titles.join( '|' )
             }, callback );
         },
-        loadLinkFlairScores: function() {
-            var pageIds = [];
-
-            $( '.articlescores-linkflair' ).each( function() {
-                pageIds.push( $( this ).attr( 'data-pageid' ) );
-            } );
-
-            // Only query if there are any link flair tags
-            if( pageIds.length ) {
-                mw.articleScores.common.getScoresForPageIds( pageIds, function( response ) {
-                    if( response.status === 'ok' ) {
-                        mw.articleScores.common.linkFlairScores = response.result;
-
-                        mw.hook( 'articleScores.loadLinkFlairScores' ).fire();
-                    }
-                } );
-            }
-        },
         loadScoreInfo: function() {
             // Only load score info if a user is logged in and at least one articlescore input exists
             if( mw.config.get( 'wgUserId' ) && $( '.articlescores-input' ).length ) {
@@ -84,7 +65,6 @@
             }
         },
         initialize: function() {
-            mw.articleScores.common.loadLinkFlairScores();
             mw.articleScores.common.loadScoreInfo();
         },
         setScore: function( metricId, submetricId, value, callback ) {

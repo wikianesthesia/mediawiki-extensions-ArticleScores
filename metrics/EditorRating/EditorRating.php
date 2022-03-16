@@ -49,6 +49,21 @@ class EditorRating extends AbstractMetric {
         return $html;
     }
 
+    public function getLinkFlairHtml( Title $title ): string {
+        $html = '';
+
+        $articleScoreValues = $this->getArticleScoreValues( $title, false, true );
+
+        if( isset( $articleScoreValues[ 'main' ] ) && $articleScoreValues[ 'main' ]->icon ) {
+            $html .= Html::rawElement( 'i', [
+                'class' => $articleScoreValues[ 'main' ]->icon . ' ' . $this->getMsgKeyPrefix() . '-icon',
+                'style' => 'color: ' . $articleScoreValues[ 'main' ]->iconColor
+            ] );
+        }
+
+        return $html;
+    }
+
     public function hasLinkFlair(): bool {
         return true;
     }

@@ -50,10 +50,8 @@ class HookHandler implements
 
         $text = new HtmlArmor(
             HtmlArmor::getHtml( $text ) .
-            Html::rawElement( 'span', [
-                    'class' => 'articlescores-linkflair',
-                    'data-pageid' => $title->getArticleID()
-                ]
+            Html::rawElement( 'span', [ 'class' => 'articlescores-linkflair' ],
+                ArticleScores::getLinkFlairForPageId( $title->getArticleID() )
             )
         );
     }

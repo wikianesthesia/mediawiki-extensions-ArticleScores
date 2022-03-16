@@ -5,7 +5,6 @@
 
     mw.articleScores.editorRating = {
         initialize: function() {
-            mw.hook( 'articleScores.loadLinkFlairScores' ).add( mw.articleScores.editorRating.renderLinkFlair );
             mw.hook( 'articleScores.loadScoreInfo' ).add( mw.articleScores.editorRating.renderInputs );
             mw.trackSubscribe( 'mediawiki.searchSuggest', mw.articleScores.editorRating.renderSearchSuggest );
             mw.trackSubscribe( 'mw.widgets.SearchInputWidget', mw.articleScores.editorRating.renderSearchInputWidget );
@@ -69,15 +68,6 @@
             $inputElement.append(
                 label, $select
             );
-        },
-        renderLinkFlair: function() {
-            for( var pageId in mw.articleScores.common.linkFlairScores ) {
-                if( mw.articleScores.common.linkFlairScores[ pageId ].hasOwnProperty( 'EditorRating' ) ) {
-                    $( '.articlescores-linkflair[data-pageid="' + pageId + '"]' ).append(
-                        mw.articleScores.editorRating.generateIcon( mw.articleScores.common.linkFlairScores[ pageId ].EditorRating.main )
-                    );
-                }
-            }
         },
         renderSearchSuggest: function( topic, data ) {
             if( data.action === 'impression-results' ) {
