@@ -21,7 +21,7 @@ class ScoreAction extends Action {
         $out->setPageTitle( wfMessage( 'articlescores-action-title', $title->getText() )->text() );
         $out->addBacklinkSubtitle( $title );
 
-        if( !ArticleScores::canTitleHaveArticleScore( $title ) ) {
+        if( !ArticleScores::canTitleStoreArticleScore( $title ) ) {
             $out->addHTML( wfMessage( 'articlescores-action-notallowed', $title->getFullText() ) );
 
             return;

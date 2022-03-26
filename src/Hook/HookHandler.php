@@ -51,7 +51,7 @@ class HookHandler implements
         $text = new HtmlArmor(
             HtmlArmor::getHtml( $text ) .
             Html::rawElement( 'span', [ 'class' => 'articlescores-linkflair' ],
-                ArticleScores::getLinkFlairForPageId( $title->getArticleID() )
+                ArticleScores::getLinkFlairForTitle( $title )
             )
         );
     }
@@ -138,7 +138,7 @@ class HookHandler implements
     public function onSkinTemplateNavigation__Universal( $sktemplate, &$links ): void {
         $title = $sktemplate->getRelevantTitle();
 
-        if( ArticleScores::canTitleHaveArticleScore( $title ) &&
+        if( ArticleScores::canTitleStoreArticleScore( $title ) &&
             ArticleScores::userCanSetAnyArticleScore( $sktemplate->getUser(), $title )) {
             $request = $sktemplate->getRequest();
 

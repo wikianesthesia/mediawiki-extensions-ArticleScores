@@ -42,12 +42,16 @@ class ArticleScores {
 
         if( !$title ||
             !$title->exists() ||
-            $title->isRedirect() ||
             !in_array( $title->getNamespace(), $wgArticleScoresEnabledNamespaces )) {
             return false;
         }
 
         return true;
+    }
+
+    public static function canTitleStoreArticleScore( Title $title ): bool {
+        return static::canTitleHaveArticleScore( $title ) &&
+            !$title->isRedirect();
     }
 
     /**
@@ -105,13 +109,11 @@ class ArticleScores {
 
 
     /**
-     * @param int $pageId
+     * @param Title $title
      * @return string
      */
-    public static function getLinkFlairForPageId( int $pageId ): string {
+    public static function getLinkFlairForTitle( Title $title ): string {
         $linkFlair = '';
-
-        $title = Title::newFromID( $pageId );
 
         if( !static::canTitleHaveArticleScore( $title ) ) {
             return $linkFlair;

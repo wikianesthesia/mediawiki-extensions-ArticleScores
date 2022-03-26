@@ -12,6 +12,7 @@ use RequestContext;
 use Status;
 use Title;
 use User;
+use WikiPage;
 
 abstract class AbstractMetric extends AbstractJsonClass {
     /**
@@ -52,6 +53,10 @@ abstract class AbstractMetric extends AbstractJsonClass {
 
         if( !$title->exists() ) {
             return $articleScoreValues;
+        } elseif( $title->isRedirect() ) {
+            $redirectTarget =
+                MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $title )->getRedirectTarget();
+            return $this->getArticleScoreValues( $redirectTarget, $includeUserscores, $includeDefaultValues );
         }
 
         $titleId = $title->getArticleID();
