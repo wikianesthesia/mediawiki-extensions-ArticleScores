@@ -37,7 +37,7 @@ class ArticleScores {
 
 
 
-    public static function canTitleHaveArticleScore( Title $title ): bool {
+    public static function canTitleHaveArticleScore( Title $title = null ): bool {
         global $wgArticleScoresEnabledNamespaces;
 
         if( !$title ||
@@ -49,7 +49,7 @@ class ArticleScores {
         return true;
     }
 
-    public static function canTitleStoreArticleScore( Title $title ): bool {
+    public static function canTitleStoreArticleScore( Title $title = null ): bool {
         return static::canTitleHaveArticleScore( $title ) &&
             !$title->isRedirect();
     }

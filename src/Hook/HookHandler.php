@@ -13,6 +13,7 @@ use MediaWiki\Hook\SidebarBeforeOutputHook;
 use MediaWiki\Hook\SkinTemplateNavigation__UniversalHook;
 use MediaWiki\Installer\Hook\LoadExtensionSchemaUpdatesHook;
 use MediaWiki\Linker\Hook\HtmlPageLinkRendererEndHook;
+use RequestContext;
 use Title;
 
 class HookHandler implements
@@ -29,7 +30,8 @@ class HookHandler implements
     public function onBeforeInitialize( $title, $unused, $output, $user, $request, $mediaWiki ) {
         global $wgArticleScoresLinkFlairTitles;
 
-        if( in_array( $title->getFullText(), $wgArticleScoresLinkFlairTitles ) ) {
+        if( in_array( $title->getDBkey(), $wgArticleScoresLinkFlairTitles ) ||
+            in_array( $title->getFullText(), $wgArticleScoresLinkFlairTitles )) {
             ArticleScores::setUseLinkFlair( true );
         }
     }
@@ -38,7 +40,10 @@ class HookHandler implements
      * @inheritDoc
      */
     public function onHtmlPageLinkRendererEnd( $linkRenderer, $target, $isKnown, &$text, &$attribs, &$ret ) {
-        if( !ArticleScores::getUseLinkFlair() || !$isKnown || $target->hasFragment() ) {
+        if( !ArticleScores::getUseLinkFlair() ||
+            !$isKnown ||
+            $target->getDBkey() === RequestContext::getMain()->getTitle()->getDBkey() ||
+            $target->hasFragment() ) {
             return;
         }
 
