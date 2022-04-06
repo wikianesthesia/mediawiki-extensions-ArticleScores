@@ -149,6 +149,10 @@ class SpecialArticleScores extends IncludableSpecialPage {
         $this->showTable( $this->getUser()->getId() );
     }
 
+    protected function getGroupName() {
+        return 'pagetools';
+    }
+
     protected function initialize( $subPage ) {
         $paramValues = [
             'metric' => $this->metric,

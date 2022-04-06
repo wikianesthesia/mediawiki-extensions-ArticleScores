@@ -4,7 +4,7 @@
       "Chris Rishel"
     ]
   },
-  "articlescores": "Article Scores",
+  "articlescores": "Article scores",
   "articlescores-extensionname": "ArticleScores",
   "articlescores-desc": "Adds the ability to score article quality using modular metrics.",
   "articlescores-action": "Score",
