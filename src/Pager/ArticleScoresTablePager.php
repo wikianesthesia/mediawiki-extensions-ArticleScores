@@ -73,6 +73,16 @@ class ArticleScoresTablePager extends TablePager {
         return in_array( $field, $sortable_fields );
     }
 
+    public function formatRow( $row ) {
+        $title = Title::newFromID( $row->page_id );
+
+        if( !$title || !$title->exists() ) {
+            return '';
+        } else {
+            return parent::formatRow( $row );
+        }
+    }
+
     /**
      * @inheritDoc
      */
@@ -84,10 +94,7 @@ class ArticleScoresTablePager extends TablePager {
         if( $name === 'page_id' ) {
             // Value is an article Id
             $title = Title::newFromID( $value );
-
-            if( $title->exists() ) {
-                $formatted = $this->getLinkRenderer()->makeKnownLink( $title );
-            }
+            $formatted = $this->getLinkRenderer()->makeKnownLink( $title );
         } elseif( $name === 'value' ) {
             $formatted = $this->submetric->getValueDefinition()->getValueString( $value );
         } elseif( $name === 'timestamp' ) {
