@@ -3,6 +3,7 @@
 namespace MediaWiki\Extension\ArticleScores;
 
 use Database;
+use Html;
 use ManualLogEntry;
 use MediaWiki\Extension\JsonClasses\AbstractJsonClass;
 use MediaWiki\MediaWikiServices;
@@ -12,7 +13,6 @@ use RequestContext;
 use Status;
 use Title;
 use User;
-use WikiPage;
 
 abstract class AbstractMetric extends AbstractJsonClass {
     /**
@@ -165,6 +165,58 @@ abstract class AbstractMetric extends AbstractJsonClass {
         }
 
         return $articleScoreValues;
+    }
+
+    public function getIconHtml( Title $title, string $submetricId = ArticleScores::DEFAULT_SUBMETRIC ): string {
+        $html = '';
+
+        $articleScoreValues = $this->getArticleScoreValues( $title, false, true );
+
+        if( isset( $articleScoreValues[ $submetricId ] ) ) {
+            $html .= $this->getSubmetric( $submetricId )->getValueDefinition()->getValueIconHtml(
+                $articleScoreValues[ $submetricId ]->value,
+                $this->getMsgKeyPrefix() . '-icon'
+            );
+        }
+
+        return $html;
+    }
+
+    public function getLegendHtml( string $submetricId = ArticleScores::DEFAULT_SUBMETRIC ): string {
+        $html = '';
+
+        $submetric = $this->getSubmetric( $submetricId );
+        if( $submetric ) {
+            $valueDefinition = $submetric->getValueDefinition();
+            if( $valueDefinition->hasOptions() ) {
+                $options = array_reverse( $submetric->getValueDefinition()->getOptions() );
+
+                if( count( $options ) ) {
+                    $html .= Html::openElement( 'div', [
+                        'class' => 'articlescores-legend ' . $this->getMsgKeyPrefix() . '-legend'
+                    ] );
+
+                    foreach( $options as $option ) {
+                        $html .= Html::openElement( 'div', [
+                            'class' => $this->getMsgKeyPrefix() . '-legend-value'
+                        ] );
+
+                        $html .= $option->getIconHtml( $this->getMsgKeyPrefix() . '-icon' );
+
+                        $html .= Html::rawElement( 'span', [
+                            'class' => $this->getMsgKeyPrefix() . '-value',
+                            'title' => $option->getDescription()
+                        ], $option->getName() );
+
+                        $html .= Html::closeElement( 'div' );
+                    }
+
+                    $html .= Html::closeElement( 'div' );
+                }
+            }
+        }
+
+        return $html;
     }
 
     /**

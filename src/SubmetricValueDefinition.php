@@ -142,7 +142,17 @@ class SubmetricValueDefinition {
      * @param $value
      * @return string
      */
-    public function getValueString( $value ) {
+    public function getValueIconHtml( $value, string $addClasses = '' ): string {
+        return $this->hasOptions() ?
+            $this->getOption( $value )->getIconHtml( $addClasses ) :
+            '';
+    }
+
+    /**
+     * @param $value
+     * @return string
+     */
+    public function getValueString( $value ): string {
         return $this->hasOptions() ?
             $this->getOption( $value )->getName() :
             (string) $value;

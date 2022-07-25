@@ -120,6 +120,14 @@ class SpecialArticleScores extends IncludableSpecialPage {
             return;
         }
 
+        $out = $this->getOutput();
+
+        $legendHtml = $this->metric->getLegendHtml( $this->submetric->getId() );
+
+        if( $legendHtml ) {
+            $out->addHTML( $legendHtml );
+        }
+
         $pager = new ArticleScoresTablePager(
             $this->submetric,
             $userId,
@@ -134,7 +142,7 @@ class SpecialArticleScores extends IncludableSpecialPage {
 
         $pager->doQuery();
 
-        $this->getOutput()->addHtml( $pager->getFullOutput()->getText() );
+        $out->addHtml( $pager->getFullOutput()->getText() );
     }
 
     public function showSubmetric() {

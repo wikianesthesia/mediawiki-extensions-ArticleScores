@@ -29,6 +29,8 @@ class ArticleScoresTablePager extends TablePager {
             $this->mDb = $readDb;
         }
 
+        $this->mIndexField = 'page_title';
+
         $this->submetric = $submetric;
         $this->userId = $userId;
         $this->options = $options;
@@ -45,15 +47,27 @@ class ArticleScoresTablePager extends TablePager {
      */
     public function getQueryInfo() {
         $queryInfo = [
-            'tables' => 'articlescores_scores',
+            'tables' => [
+                'articlescores_scores',
+                'page'
+            ],
             'fields' => [
-                'page_id',
+                'page_title',
                 'value',
                 'timestamp'
             ],
             'conds' => [
                 'metric_id' => $this->submetric->getMetric()->getId(),
                 'submetric_id' => $this->submetric->getId()
+            ],
+            'options' => [
+                'ORDER BY' => 'value DESC, page_title ASC'
+            ],
+            'join_conds' => [
+                'page' => [
+                    'JOIN',
+                    'articlescores_scores.page_id = page.page_id'
+                ]
             ]
         ];
 
@@ -68,13 +82,13 @@ class ArticleScoresTablePager extends TablePager {
      * @inheritDoc
      */
     protected function isFieldSortable( $field ) {
-        $sortable_fields = [ 'page_id', 'value', 'timestamp' ];
+        $sortable_fields = [ 'page_title', 'value', 'timestamp' ];
 
         return in_array( $field, $sortable_fields );
     }
 
     public function formatRow( $row ) {
-        $title = Title::newFromID( $row->page_id );
+        $title = Title::newFromText( $row->page_title );
 
         if( !$title || !$title->exists() ) {
             return '';
@@ -91,12 +105,13 @@ class ArticleScoresTablePager extends TablePager {
 
         $language = $this->getLanguage();
 
-        if( $name === 'page_id' ) {
+        if( $name === 'page_title' ) {
             // Value is an article Id
-            $title = Title::newFromID( $value );
+            $title = Title::newFromText( $value );
             $formatted = $this->getLinkRenderer()->makeKnownLink( $title );
         } elseif( $name === 'value' ) {
-            $formatted = $this->submetric->getValueDefinition()->getValueString( $value );
+            $iconHtml = $this->submetric->getValueDefinition()->getValueIconHtml( $value );
+            $formatted = $iconHtml ?: $this->submetric->getValueDefinition()->getValueString( $value );
         } elseif( $name === 'timestamp' ) {
             $formatted = htmlspecialchars(
                 $language->userTimeAndDate( $value, $this->getUser() )
@@ -118,7 +133,7 @@ class ArticleScoresTablePager extends TablePager {
      */
     protected function getFieldNames() {
         $fieldNames = [
-            'page_id' => $this->msg( 'articlescores-article' )->escaped()
+            'page_title' => $this->msg( 'articlescores-article' )->escaped()
         ];
 
         if( isset( $this->options[ 'value' ] ) && $this->options[ 'value' ] ) {

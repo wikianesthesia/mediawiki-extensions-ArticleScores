@@ -2,6 +2,8 @@
 
 namespace MediaWiki\Extension\ArticleScores;
 
+use Html;
+
 class SubmetricValueOption {
     protected $_valueDefinition;
 
@@ -86,6 +88,31 @@ class SubmetricValueOption {
      */
     public function getIconColor() {
         return $this->iconColor;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getIconHtml( string $addClasses = '' ) {
+        $html = '';
+
+        $icon = $this->getIcon();
+        if( $icon ) {
+            $attribs = [
+                'class' => $icon
+            ];
+
+            $attribs[ 'class' ] .= $addClasses ? ' ' . $addClasses : '';
+
+            $iconColor = $this->getIconColor();
+            if( $iconColor ) {
+                $attribs[ 'style' ] = 'color: ' . $iconColor;
+            }
+
+            $html .= Html::rawElement( 'i', $attribs );
+        }
+
+        return $html;
     }
 
     /**

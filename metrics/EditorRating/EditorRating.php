@@ -4,6 +4,7 @@ namespace MediaWiki\Extension\ArticleScores\Metric;
 
 use Html;
 use MediaWiki\Extension\ArticleScores\AbstractMetric;
+use MediaWiki\Extension\ArticleScores\ArticleScores;
 use Parser;
 use Title;
 
@@ -20,12 +21,7 @@ class EditorRating extends AbstractMetric {
         if( isset( $articleScoreValues[ 'main' ] ) ) {
             $editorRatingValue = '';
 
-            if( $articleScoreValues[ 'main' ]->icon ) {
-                $editorRatingValue .= Html::rawElement( 'i', [
-                    'class' => $articleScoreValues[ 'main' ]->icon . ' ' . $this->getMsgKeyPrefix() . '-icon',
-                    'style' => 'color: ' . $articleScoreValues[ 'main' ]->iconColor
-                ] );
-            }
+            $editorRatingValue .= $this->getIconHtml( $title );
 
             $editorRatingValue .= $articleScoreValues[ 'main' ]->name;
 
@@ -50,18 +46,7 @@ class EditorRating extends AbstractMetric {
     }
 
     public function getLinkFlairHtml( Title $title ): string {
-        $html = '';
-
-        $articleScoreValues = $this->getArticleScoreValues( $title, false, true );
-
-        if( isset( $articleScoreValues[ 'main' ] ) && $articleScoreValues[ 'main' ]->icon ) {
-            $html .= Html::rawElement( 'i', [
-                'class' => $articleScoreValues[ 'main' ]->icon . ' ' . $this->getMsgKeyPrefix() . '-icon',
-                'style' => 'color: ' . $articleScoreValues[ 'main' ]->iconColor
-            ] );
-        }
-
-        return $html;
+        return $this->getIconHtml( $title );
     }
 
     public function hasLinkFlair(): bool {
